@@ -1,471 +1,1822 @@
-<!DOCTYPE html> 
-<html lang="en"> 
-<head> 
-    <meta charset="UTF-8"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>WellnessWeavers - Your AI Wellness Companion</title> 
-    <style> 
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-        } 
-
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            min-height: 100vh; 
-            color: #333; 
-        } 
-
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 20px; 
-        } 
-
-        .header { 
-            text-align: center; 
-            margin-bottom: 30px; 
-            color: white; 
-        } 
-
-        .header h1 { 
-            font-size: 2.5rem; 
-            margin-bottom: 10px; 
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3); 
-        } 
-
-        .header p { 
-            font-size: 1.2rem; 
-            opacity: 0.9; 
-        } 
-
-        .main-content { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 30px; 
-            margin-bottom: 30px; 
-        } 
-
-        .feature-card { 
-            background: rgba(255, 255, 255, 0.95); 
-            border-radius: 20px; 
-            padding: 30px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-            backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255,255,255,0.2); 
-        } 
-
-        .feature-title { 
-            font-size: 1.5rem; 
-            margin-bottom: 20px; 
-            color: #4a5568; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-        } 
-
-        .chat-container { 
-            height: 400px; 
-            display: flex; 
-            flex-direction: column; 
-        } 
-
-        .chat-messages { 
-            flex: 1; 
-            overflow-y: auto; 
-            border: 2px solid #e2e8f0; 
-            border-radius: 15px; 
-            padding: 15px; 
-            margin-bottom: 15px; 
-            background: #f8fafc; 
-        } 
-
-        .message { 
-            margin-bottom: 15px; 
-            padding: 12px 16px; 
-            border-radius: 18px; 
-            max-width: 80%; 
-            word-wrap: break-word; 
-        } 
-
-        .user-message { 
-            background: linear-gradient(135deg, #667eea, #764ba2); 
-            color: white; 
-            margin-left: auto; 
-            text-align: right; 
-        } 
-
-        .ai-message { 
-            background: #e2e8f0; 
-            color: #2d3748; 
-        } 
-
-        .chat-input-container { 
-            display: flex; 
-            gap: 10px; 
-        } 
-
-        .chat-input { 
-            flex: 1; 
-            padding: 12px 16px; 
-            border: 2px solid #e2e8f0; 
-            border-radius: 25px; 
-            font-size: 16px; 
-            outline: none; 
-            transition: border-color 0.3s; 
-        } 
-
-        .chat-input:focus { 
-            border-color: #667eea; 
-        } 
-
-        .send-btn { 
-            padding: 12px 24px; 
-            background: linear-gradient(135deg, #667eea, #764ba2); 
-            color: white; 
-            border: none; 
-            border-radius: 25px; 
-            cursor: pointer; 
-            font-weight: 600; 
-            transition: transform 0.2s; 
-        } 
-
-        .send-btn:hover { 
-            transform: translateY(-2px); 
-        } 
-
-        .mood-section { 
-            text-align: center; 
-        } 
-
-        .mood-selector { 
-            display: flex; 
-            justify-content: center; 
-            gap: 15px; 
-            margin: 20px 0; 
-            flex-wrap: wrap; 
-        } 
-
-        .mood-option { 
-            width: 60px; 
-            height: 60px; 
-            border: 3px solid transparent; 
-            border-radius: 50%; 
-            background: #f1f5f9; 
-            cursor: pointer; 
-            transition: all 0.3s; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 2rem; 
-        } 
-
-        .mood-option:hover, .mood-option.selected { 
-            transform: scale(1.1); 
-            border-color: #667eea; 
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3); 
-        } 
-
-        .mood-chart { 
-            width: 100%; 
-            height: 200px; 
-            margin-top: 20px; 
-        } 
-
-        .dashboard { 
-            grid-column: 1 / -1; 
-        } 
-
-        .stats-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-            gap: 20px; 
-            margin-top: 20px; 
-        } 
-
-        .stat-card { 
-            background: linear-gradient(135deg, #667eea, #764ba2); 
-            color: white; 
-            padding: 20px; 
-            border-radius: 15px; 
-            text-align: center; 
-        } 
-
-        .stat-number { 
-            font-size: 2rem; 
-            font-weight: bold; 
-            margin-bottom: 5px; 
-        } 
-
-        .safety-alert { 
-            background: linear-gradient(135deg, #ff6b6b, #ee5a52); 
-            color: white; 
-            padding: 20px; 
-            border-radius: 15px; 
-            margin-top: 20px; 
-            text-align: center; 
-            display: none; 
-        } 
-
-        .emergency-resources { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 15px; 
-            margin-top: 15px; 
-        } 
-
-        .resource-card { 
-            background: rgba(255,255,255,0.2); 
-            padding: 15px; 
-            border-radius: 10px; 
-            text-align: left; 
-        } 
-
-        @media (max-width: 768px) { 
-            .main-content { 
-                grid-template-columns: 1fr; 
-            } 
-            
-            .header h1 { 
-                font-size: 2rem; 
-            } 
-            
-            .mood-selector { 
-                gap: 10px; 
-            } 
-            
-            .mood-option { 
-                width: 50px; 
-                height: 50px; 
-                font-size: 1.5rem; 
-            } 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WellnessWeavers - Your AI Wellness Companion</title>
+    <style>
+        /* ===== GLOBAL STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-    </style> 
-</head> 
-<body> 
-    <div class="container"> 
-        <header class="header"> 
-            <h1>WellnessWeavers</h1> 
-            <p>Your AI-powered wellness companion for mental health support</p> 
-        </header> 
-        
-        <main class="main-content"> 
-            <section class="feature-card"> 
-                <h2 class="feature-title">💬 AI Wellness Chat</h2> 
-                <div class="chat-container"> 
-                    <div class="chat-messages" id="chatMessages"> 
-                        <div class="message ai-message">Hello! I'm your wellness companion. How are you feeling today?</div> 
-                    </div> 
-                    <div class="chat-input-container"> 
-                        <input type="text" class="chat-input" id="chatInput" placeholder="Type your message here..."> 
-                        <button class="send-btn" id="sendBtn">Send</button> 
-                    </div> 
-                </div> 
-            </section> 
+
+        :root {
+            /* Primary Colors */
+            --primary-blue: #667eea;
+            --primary-purple: #764ba2;
+            --secondary-blue: #4299e1;
+            --accent-color: #ed8936;
             
-            <section class="feature-card"> 
-                <h2 class="feature-title">😊 Mood Tracker</h2> 
-                <div class="mood-section"> 
-                    <p>How are you feeling today?</p> 
-                    <div class="mood-selector"> 
-                        <div class="mood-option" data-mood="1">😢</div> 
-                        <div class="mood-option" data-mood="2">😕</div> 
-                        <div class="mood-option" data-mood="3">😐</div> 
-                        <div class="mood-option" data-mood="4">🙂</div> 
-                        <div class="mood-option" data-mood="5">😄</div> 
-                    </div> 
-                    <canvas id="moodChart" class="mood-chart"></canvas> 
-                </div> 
-            </section> 
+            /* Neutral Colors */
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e0;
+            --gray-400: #a0aec0;
+            --gray-500: #718096;
+            --gray-600: #4a5568;
+            --gray-700: #2d3748;
+            --gray-800: #1a202c;
             
-            <section class="feature-card dashboard"> 
-                <h2 class="feature-title">📊 Wellness Dashboard</h2> 
-                <div class="stats-grid"> 
-                    <div class="stat-card"> 
-                        <div class="stat-number">7</div> 
-                        <div class="stat-label">Day Streak</div> 
-                    </div> 
-                    <div class="stat-card"> 
-                        <div class="stat-number">3.8</div> 
-                        <div class="stat-label">Avg. Mood (Last Week)</div> 
-                    </div> 
-                    <div class="stat-card"> 
-                        <div class="stat-number">12</div> 
-                        <div class="stat-label">Wellness Tips Received</div> 
-                    </div> 
-                    <div class="stat-card"> 
-                        <div class="stat-number">85%</div> 
-                        <div class="stat-label">Positive Interaction Rate</div> 
-                    </div> 
-                </div> 
-                
-                <div class="safety-alert" id="safetyAlert"> 
-                    <h3>We're concerned about you</h3> 
-                    <p>Based on your recent interactions, we think you might benefit from additional support.</p> 
-                    <div class="emergency-resources"> 
-                        <div class="resource-card"> 
-                            <h4>Crisis Helpline</h4> 
-                            <p>24/7 Support: 988</p> 
-                        </div> 
-                        <div class="resource-card"> 
-                            <h4>Text Crisis Line</h4> 
-                            <p>Text HOME to 741741</p> 
-                        </div> 
-                        <div class="resource-card"> 
-                            <h4>Find Local Resources</h4> 
-                            <p>Visit: findhelp.org</p> 
-                        </div> 
-                    </div> 
-                </div> 
-            </section> 
-        </main> 
-    </div> 
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
-    <script> 
-        // Chat functionality 
-        const chatMessages = document.getElementById('chatMessages'); 
-        const chatInput = document.getElementById('chatInput'); 
-        const sendBtn = document.getElementById('sendBtn'); 
-        
-        // Sample responses for the AI wellness companion 
-        const aiResponses = [ 
-            "How have you been managing stress lately?", 
-            "What's one small thing that brought you joy today?", 
-            "Remember that it's okay to take breaks when you need them.", 
-            "Have you tried any mindfulness exercises recently?", 
-            "What's one thing you're grateful for today?", 
-            "Remember to be kind to yourself, just as you would be to a friend.", 
-            "Deep breathing can help when you're feeling overwhelmed. Want to try a quick exercise?", 
-            "Setting small, achievable goals can help build confidence. What's one small goal you could set for tomorrow?", 
-            "How has your sleep been lately? Good sleep is so important for mental wellbeing.", 
-            "Remember that your feelings are valid, whatever they may be." 
-        ]; 
-        
-        // Function to add a message to the chat 
-        function addMessage(text, isUser) { 
-            const messageDiv = document.createElement('div'); 
-            messageDiv.classList.add('message'); 
-            messageDiv.classList.add(isUser ? 'user-message' : 'ai-message'); 
-            messageDiv.textContent = text; 
-            chatMessages.appendChild(messageDiv); 
-            chatMessages.scrollTop = chatMessages.scrollHeight; 
+            /* Status Colors */
+            --success-green: #48bb78;
+            --warning-yellow: #ed8936;
+            --danger-red: #f56565;
+            --crisis-red: #e53e3e;
             
-            // Check for concerning content 
-            if (isUser && hasConcerningContent(text)) { 
-                document.getElementById('safetyAlert').style.display = 'block'; 
-            } 
-        } 
-        
-        // Function to check for concerning content (simplified example) 
-        function hasConcerningContent(text) { 
-            const concerningPhrases = ['suicide', 'kill myself', 'want to die', 'end my life', 'no reason to live']; 
-            return concerningPhrases.some(phrase => text.toLowerCase().includes(phrase)); 
-        } 
-        
-        // Send message when button is clicked 
-        sendBtn.addEventListener('click', sendMessage); 
-        
-        // Send message when Enter key is pressed 
-        chatInput.addEventListener('keypress', function(e) { 
-            if (e.key === 'Enter') { 
-                sendMessage(); 
-            } 
-        }); 
-        
-        function sendMessage() { 
-            const message = chatInput.value.trim(); 
-            if (message) { 
-                addMessage(message, true); 
-                chatInput.value = ''; 
+            /* Shadows and Effects */
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            --gradient-danger: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            --gradient-success: linear-gradient(135deg, #48bb78, #38a169);
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--gradient-primary);
+            min-height: 100vh;
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        /* ===== LAYOUT COMPONENTS ===== */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--white);
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .header .tagline {
+            font-size: 1rem;
+            margin-top: 5px;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            padding: 5px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: var(--white);
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-tab.active, .nav-tab:hover {
+            background: var(--white);
+            color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* ===== CARD COMPONENTS ===== */
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: var(--shadow-xl);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .feature-title {
+            font-size: 1.75rem;
+            margin-bottom: 24px;
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+
+        .feature-subtitle {
+            font-size: 0.9rem;
+            color: var(--gray-500);
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        /* ===== CHAT INTERFACE ===== */
+        .chat-container {
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border-radius: 15px 15px 0 0;
+            margin-bottom: 15px;
+        }
+
+        .ai-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-green);
+            animation: pulse 2s infinite;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            border: 2px solid var(--gray-200);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: var(--gray-50);
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            padding: 14px 18px;
+            border-radius: 20px;
+            max-width: 85%;
+            word-wrap: break-word;
+            position: relative;
+            animation: messageSlideIn 0.3s ease-out;
+        }
+
+        .user-message {
+            background: var(--gradient-primary);
+            color: var(--white);
+            margin-left: auto;
+            text-align: right;
+            border-bottom-right-radius: 6px;
+        }
+
+        .ai-message {
+            background: var(--white);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-200);
+            border-bottom-left-radius: 6px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .message-timestamp {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .message-reactions {
+            margin-top: 8px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .reaction-btn {
+            background: none;
+            border: 1px solid var(--gray-300);
+            border-radius: 15px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reaction-btn:hover {
+            background: var(--gray-100);
+        }
+
+        /* Chat Input */
+        .chat-input-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .chat-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--gray-300);
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-counter {
+            position: absolute;
+            bottom: -20px;
+            right: 10px;
+            font-size: 0.75rem;
+            color: var(--gray-400);
+        }
+
+        .send-btn {
+            padding: 16px 28px;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 100px;
+            justify-content: center;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: none;
+            padding: 14px 18px;
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 20px;
+            max-width: 85%;
+            margin-bottom: 16px;
+            border-bottom-left-radius: 6px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .typing-text {
+            margin-right: 8px;
+            font-size: 0.9rem;
+            color: var(--gray-500);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gray-400);
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        /* ===== MOOD TRACKING ===== */
+        .mood-section {
+            text-align: center;
+        }
+
+        .mood-question {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--gray-600);
+        }
+
+        .mood-selector {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .mood-option {
+            width: 70px;
+            height: 70px;
+            border: 3px solid transparent;
+            border-radius: 50%;
+            background: var(--gray-100);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mood-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mood-option:hover, .mood-option.selected {
+            transform: scale(1.15);
+            border-color: var(--primary-blue);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .mood-option:hover::before, .mood-option.selected::before {
+            opacity: 0.1;
+        }
+
+        .mood-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .mood-history {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--gray-50);
+            border-radius: 12px;
+        }
+
+        .mood-chart {
+            width: 100%;
+            height: 220px;
+            margin-top: 20px;
+        }
+
+        /* Mood Insights */
+        .mood-insights {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(102, 126, 234, 0.05);
+            border-left: 4px solid var(--primary-blue);
+            border-radius: 8px;
+        }
+
+        .insight-title {
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin-bottom: 8px;
+        }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard {
+            grid-column: 1 / -1;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            color: var(--gray-700);
+            padding: 28px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--primary-blue);
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--gray-500);
+            font-weight: 500;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            margin-top: 6px;
+        }
+
+        .stat-change.positive {
+            color: var(--success-green);
+        }
+
+        .stat-change.negative {
+            color: var(--danger-red);
+        }
+
+        /* ===== WELLNESS TOOLKIT ===== */
+        .toolkit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .toolkit-item {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            border: 1px solid var(--gray-200);
+        }
+
+        .toolkit-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .toolkit-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .toolkit-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--gray-700);
+        }
+
+        .toolkit-description {
+            color: var(--gray-500);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .toolkit-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .toolkit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ===== SAFETY ALERT SYSTEM ===== */
+        .safety-alert {
+            background: var(--gradient-danger);
+            color: var(--white);
+            padding: 32px;
+            border-radius: 20px;
+            margin-top: 30px;
+            text-align: center;
+            display: none;
+            animation: alertSlideIn 0.5s ease-out;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .safety-alert h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .safety-alert p {
+            font-size: 1.1rem;
+            margin-bottom: 24px;
+            opacity: 0.95;
+        }
+
+        .emergency-resources {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .resource-card {
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: left;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .resource-card strong {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .resource-card a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes alertSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { 
+                transform: translateY(0); 
+            }
+            30% { 
+                transform: translateY(-10px); 
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2.25rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+            
+            .nav-tabs {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .nav-tab {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .feature-card {
+                padding: 24px;
+            }
+            
+            .mood-selector {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 10px;
+            }
+            
+            .mood-option {
+                width: 55px;
+                height: 55px;
+                font-size: 1.8rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .chat-container {
+                height: 380px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .feature-card {
+                padding: 20px;
+            }
+            
+            .mood-selector {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+            }
+            
+            .mood-option {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+            
+            .emergency-resources {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== ACCESSIBILITY ===== */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Focus styles for better accessibility */
+        .mood-option:focus,
+        .nav-tab:focus,
+        .send-btn:focus,
+        .toolkit-btn:focus {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>🌟 WellnessWeavers</h1>
+            <p>Your AI-Powered Mental Wellness Companion</p>
+            <div class="tagline">Empowering young minds through compassionate technology</div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('chat')">💬 AI Chat</button>
+            <button class="nav-tab" onclick="switchTab('mood')">📊 Mood Analytics</button>
+            <button class="nav-tab" onclick="switchTab('dashboard')">📈 Dashboard</button>
+            <button class="nav-tab" onclick="switchTab('toolkit')">🛠️ Wellness Toolkit</button>
+        </div>
+
+        <!-- Chat Section -->
+        <div id="chat-section" class="content-section active">
+            <div class="main-content">
+                <div class="feature-card" style="grid-column: 1 / -1;">
+                    <h2 class="feature-title">
+                        💬 AI Therapeutic Chat
+                    </h2>
+                    <div class="feature-subtitle">
+                        Share your thoughts in a safe, non-judgmental space. Our AI companion uses advanced empathy modeling to provide personalized support.
+                    </div>
+                    <div class="chat-container">
+                        <div class="chat-header">
+                            <div class="ai-status">
+                                <div class="status-dot"></div>
+                                AI Companion Online
+                            </div>
+                            <div style="font-size: 0.9rem;">End-to-End Encrypted</div>
+                        </div>
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message ai-message">
+                                <div>Hi there! I'm your wellness companion. I'm here to listen and support you through whatever you're experiencing. How are you feeling today? 😊</div>
+                                <div class="message-timestamp">Just now</div>
+                                <div class="message-reactions">
+                                    <button class="reaction-btn">👍</button>
+                                    <button class="reaction-btn">❤️</button>
+                                    <button class="reaction-btn">🤗</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="typing-indicator" id="typingIndicator">
+                            <div class="typing-dots">
+                                <span class="typing-text">AI is typing</span>
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                            </div>
+                        </div>
+                        <div class="chat-input-container">
+                            <div class="chat-input-wrapper">
+                                <textarea class="chat-input" id="chatInput" placeholder="Share your thoughts... (Press Enter to send)" rows="1"></textarea>
+                                <div class="input-counter"><span id="charCount">0</span>/500</div>
+                            </div>
+                            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                                <span id="sendBtnText">Send</span>
+                                <span id="sendIcon">📤</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mood Section -->
+        <div id="mood-section" class="content-section">
+            <div class="main-content">
+                <div class="feature-card" style="grid-column: 1 / -1;">
+                    <h2 class="feature-title">
+                        📊 Mood Analytics & Tracking
+                    </h2>
+                    <div class="feature-subtitle">
+                        Track your emotional well-being over time. Our AI analyzes patterns to provide personalized insights and early intervention recommendations.
+                    </div>
+                    <div class="mood-section">
+                        <div class="mood-question">How are you feeling right now?</div>
+                        <div class="mood-selector">
+                            <div class="mood-option" onclick="selectMood(1, '😢', 'Very Sad')" data-mood="1">
+                                😢
+                                <div class="mood-label">Very Sad</div>
+                            </div>
+                            <div class="mood-option" onclick="selectMood(2, '😞', 'Sad')" data-mood="2">
+                                😞
+                                <div class="mood-label">Sad</div>
+                            </div>
+                            <div class="mood-option" onclick="selectMood(3, '😐', 'Neutral')" data-mood="3">
+                                😐
+                                <div class="mood-label">Neutral</div>
+                            </div>
+                            <div class="mood-option" onclick="selectMood(4, '😊', 'Happy')" data-mood="4">
+                                😊
+                                <div class="mood-label">Happy</div>
+                            </div>
+                            <div class="mood-option" onclick="selectMood(5, '😄', 'Very Happy')" data-mood="5">
+                                😄
+                                <div class="mood-label">Very Happy</div>
+                            </div>
+                        </div>
+                        <canvas id="moodChart" class="mood-chart"></canvas>
+                        
+                        <div class="mood-insights" id="moodInsights">
+                            <div class="insight-title">💡 AI Insights</div>
+                            <div id="insightText">Log your mood to see personalized insights and recommendations.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="content-section">
+            <div class="feature-card dashboard">
+                <h2 class="feature-title">
+                    📈 Your Wellness Dashboard
+                </h2>
+                <div class="feature-subtitle">
+                    Comprehensive overview of your mental health journey with AI-powered analytics and progress tracking.
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">😊</div>
+                        <div class="stat-number" id="avgMood">7.2</div>
+                        <div class="stat-label">Average Mood</div>
+                        <div class="stat-change positive">+0.3 from last week</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-number" id="daysTracked">12</div>
+                        <div class="stat-label">Days Tracked</div>
+                        <div class="stat-change positive">Consistent logging!</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💬</div>
+                        <div class="stat-number" id="chatSessions">8</div>
+                        <div class="stat-label">Chat Sessions</div>
+                        <div class="stat-change positive">+2 this week</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🌟</div>
+                        <div class="stat-number" id="wellnessScore">85</div>
+                        <div class="stat-label">Wellness Score</div>
+                        <div class="stat-change positive">Improving trend</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-number" id="goalsCompleted">3</div>
+                        <div class="stat-label">Goals Completed</div>
+                        <div class="stat-change positive">2 this month</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚡</div>
+                        <div class="stat-number" id="streakDays">5</div>
+                        <div class="stat-label">Current Streak</div>
+                        <div class="stat-change positive">Keep it up!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolkit Section -->
+        <div id="toolkit-section" class="content-section">
+            <div class="feature-card dashboard">
+                <h2 class="feature-title">
+                    🛠️ Wellness Toolkit
+                </h2>
+                <div class="feature-subtitle">
+                    Evidence-based tools and resources curated by mental health professionals to support your journey.
+                </div>
+                <div class="toolkit-grid">
+                    <div class="toolkit-item">
+                        <div class="toolkit-icon">🫁</div>
+                        <div class="toolkit-title">Breathing Exercises</div>
+                        <div class="toolkit-description">
+                            Guided breathing techniques to reduce anxiety and promote calm. Includes 4-7-8 breathing, box breathing, and progressive relaxation.
+                        </div>
+                        <button class="toolkit-btn" onclick="startBreathingExercise()">Start Session</button>
+                    </div>
+                    <div class="toolkit-item">
+                        <div class="toolkit-icon">🧘</div>
+                        <div class="toolkit-title">Mindfulness Meditation</div>
+                        <div class="toolkit-description">
+                            Short guided meditations designed for beginners. Practice mindfulness to improve emotional regulation and self-awareness.
+                        </div>
+                        <button class="toolkit-btn" onclick="startMeditation()">Begin Meditation</button>
+                    </div>
+                    <div class="toolkit-item">
+                        <div class="toolkit-icon">📝</div>
+                        <div class="toolkit-title">Thought Journal</div>
+                        <div class="toolkit-description">
+                            Cognitive behavioral therapy techniques to identify and challenge negative thought patterns. Track triggers and responses.
+                        </div>
+                        <button class="toolkit-btn" onclick="openThoughtJournal()">Open Journal</button>
+                    </div>
+                    <div class="toolkit-item">
+                        <div class="toolkit-icon">🎵</div>
+                        <div class="toolkit-title">Mood Music</div>
+                        <div class="toolkit-description">
+                            Curated playlists designed to support different emotional states. From calming ambient to uplifting motivational tracks.
+                        </div>
+                        <button class="toolkit-btn" onclick="openMoodMusic()">Browse Music</button>
+                    </div>
+                    <div class="toolkit-item">
+                        <div class="toolkit-icon">🎯</div>
+                        <div class="toolkit-title">Goal Setting</div>
+                        <div class="toolkit-description">
+                            Set SMART wellness goals and track your progress. Break down larger objectives into manageable daily actions.
+                        </div>
+                        <button class="toolkit-btn" onclick="openGoalSetting()">Set Goals</button>
+                    </div>
+                    <div class="toolkit-item">
+                        <div class="toolkit-icon">📞</div>
+                        <div class="toolkit-title">Crisis Resources</div>
+                        <div class="toolkit-description">
+                            24/7 crisis support contacts and emergency resources. Quick access to professional help when you need it most.
+                        </div>
+                        <button class="toolkit-btn" onclick="showCrisisResources()">Get Help Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Safety Alert System -->
+        <div class="safety-alert" id="safetyAlert">
+            <h3>🚨 We're Here for You</h3>
+            <p>It seems like you might be going through a tough time. Remember, you're not alone, and your feelings are valid.</p>
+            <div class="emergency-resources">
+                <div class="resource-card">
+                    <strong>Crisis Helpline</strong><br>
+                    <a href="tel:988">📞 988 (Suicide & Crisis Lifeline)</a><br>
+                    <small>24/7 free and confidential support</small>
+                </div>
+                <div class="resource-card">
+                    <strong>Text Support</strong><br>
+                    <a href="sms:741741">📱 Text HOME to 741741</a><br>
+                    <small>Crisis Text Line - 24/7 support via text</small>
+                </div>
+                <div class="resource-card">
+                    <strong>Teen Line</strong><br>
+                    <a href="tel:18008528336">📞 1-800-852-8336</a><br>
+                    <small>Teens helping teens (6pm-10pm PST)</small>
+                </div>
+                <div class="resource-card">
+                    <strong>International</strong><br>
+                    <a href="https://www.befrienders.org" target="_blank">🌍 Befrienders Worldwide</a><br>
+                    <small>Crisis support in your country</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for Breathing Exercise -->
+        <div id="breathingModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>🫁 Guided Breathing Exercise</h3>
+                    <button class="close-btn" onclick="closeBreathingModal()">&times;</button>
+                </div>
+                <div class="breathing-exercise">
+                    <div class="breathing-circle" id="breathingCircle">
+                        <div class="breathing-text" id="breathingText">Ready?</div>
+                    </div>
+                    <div class="breathing-controls">
+                        <button id="startBreathingBtn" onclick="startBreathingAnimation()">Start</button>
+                        <button id="stopBreathingBtn" onclick="stopBreathingAnimation()" style="display: none;">Stop</button>
+                    </div>
+                    <div class="breathing-instructions">
+                        <p>Follow the circle: <strong>Inhale</strong> as it expands, <strong>Exhale</strong> as it contracts</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== GLOBAL VARIABLES =====
+        let chatMessages = [];
+        let moodData = [7, 6, 8, 5, 9, 7, 8, 6, 7, 8, 9, 7]; // Sample mood data
+        let moodChart;
+        let currentSection = 'chat';
+        let messageCount = 0;
+        let breathingInterval;
+        let breathingPhase = 'ready'; // ready, inhale, hold, exhale
+
+        // Enhanced AI Response System with more sophisticated categorization
+        const aiResponses = {
+            greeting: [
+                "Hello! I'm glad you're here. Taking the step to reach out shows real strength. What's on your mind today?",
+                "Hi there! I'm here to listen and support you through whatever you're experiencing. How can I help?",
+                "Welcome! It's wonderful that you're prioritizing your mental wellness. What would you like to talk about?"
+            ],
+            positive: [
+                "That's wonderful to hear! It sounds like you're in a good space right now. What's been contributing to these positive feelings?",
+                "I'm so glad you're feeling positive! Celebrating these moments is important. Would you like to share what's been going well?",
+                "Your positive energy is inspiring! How can we help you maintain and build on these good feelings?"
+            ],
+            negative: [
+                "I hear that you're struggling right now, and I want you to know that your feelings are completely valid. What's been weighing most heavily on your mind?",
+                "Thank you for trusting me with these difficult feelings. It takes real courage to reach out when you're hurting. I'm here to listen and support you.",
+                "I'm sorry you're going through such a tough time. Please remember that it's okay to not be okay sometimes. What would help you feel even a little bit better right now?"
+            ],
+            anxious: [
+                "Anxiety can feel overwhelming, but you're taking a positive step by reaching out. Let's work through this together. What's causing you the most worry right now?",
+                "I understand that anxiety can be really challenging. You're not alone in this. Have you tried any coping strategies that have helped before?",
+                "Anxiety affects so many people, and what you're feeling is valid. Would you like to try a breathing exercise together, or would you prefer to talk about what's on your mind?"
+            ],
+            lonely: [
+                "Feeling lonely is one of the hardest emotions to experience, and I'm glad you reached out instead of isolating further. You're not as alone as you might feel right now.",
+                "Loneliness can be so painful, but connecting here is a step toward building meaningful relationships. What kinds of connections are you looking for?",
+                "I hear how isolated you're feeling. Sometimes reaching out, like you just did, is the hardest but most important step. What's making you feel most disconnected?"
+            ],
+            stressed: [
+                "Stress can feel overwhelming when it builds up. You're wise to recognize it and seek support. What are the main sources of pressure in your life right now?",
+                "It sounds like you're carrying a lot right now. Let's break this down together - what feels most urgent or overwhelming?",
+                "Stress affects both our minds and bodies. Have you noticed any physical symptoms, or is it more emotional pressure you're dealing with?"
+            ],
+            neutral: [
+                "Thanks for checking in with me. Sometimes feeling neutral or 'meh' is completely normal too. Is there anything specific on your mind today?",
+                "I appreciate you sharing, even when things feel ordinary. How has your day been treating you so far?",
+                "It's okay to have days where you feel somewhere in the middle. Would you like to talk about anything, or are you just taking things as they come?"
+            ],
+            crisis: [
+                "I'm really concerned about you and want you to know that you matter deeply. Please consider reaching out to a crisis counselor who can provide immediate, professional support.",
+                "Your safety is the most important thing right now. You don't have to go through this alone - there are trained people who want to help you through this difficult time.",
+                "I can hear how much pain you're in right now. Please know that these intense feelings can change, and there are people specifically trained to help in moments like this."
+            ],
+            gratitude: [
+                "I'm so grateful you felt comfortable sharing that with me. Thank you for trusting me with your thoughts and feelings.",
+                "Thank you for being so open. Your willingness to share helps create the kind of connection that supports healing.",
+                "I really appreciate your honesty. It means a lot that you're willing to be vulnerable here."
+            ]
+        };
+
+        // Enhanced keyword detection with more nuanced categorization
+        const keywordCategories = {
+            crisis: ['suicide', 'kill myself', 'end it all', 'hurt myself', 'die', 'hopeless', 'worthless', 'no point', 'give up', 'can\'t go on'],
+            anxiety: ['anxious', 'worried', 'panic', 'scared', 'nervous', 'stress', 'overwhelmed', 'can\'t breathe', 'racing thoughts', 'fear'],
+            depression: ['sad', 'depressed', 'down', 'empty', 'numb', 'hopeless', 'worthless', 'tired', 'exhausted', 'dark'],
+            positive: ['happy', 'great', 'good', 'amazing', 'wonderful', 'excited', 'joy', 'grateful', 'blessed', 'fantastic'],
+            lonely: ['lonely', 'alone', 'isolated', 'no friends', 'nobody', 'abandoned', 'disconnected', 'left out'],
+            stressed: ['stressed', 'pressure', 'overwhelmed', 'too much', 'can\'t cope', 'burnout', 'exhausted', 'deadline'],
+            gratitude: ['thank you', 'thanks', 'grateful', 'appreciate', 'helped', 'better'],
+            greeting: ['hello', 'hi', 'hey', 'good morning', 'good evening', 'how are you']
+        };
+
+        // ===== NAVIGATION FUNCTIONS =====
+        function switchTab(section) {
+            // Update active tab
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(section + '-section').classList.add('active');
+            currentSection = section;
+            
+            // Initialize section-specific content
+            if (section === 'mood' && !moodChart) {
+                setTimeout(initMoodChart, 100);
+            }
+        }
+
+        // ===== CHAT FUNCTIONALITY =====
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message === '' || message.length > 500) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+            updateCharCount();
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            // Simulate AI processing time
+            setTimeout(() => {
+                hideTypingIndicator();
+                const response = generateAIResponse(message);
+                addMessage(response.text, 'ai');
                 
-                // Simulate AI response after a short delay 
-                setTimeout(() => { 
-                    const randomResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)]; 
-                    addMessage(randomResponse, false); 
-                }, 1000); 
-            } 
-        } 
-        
-        // Mood tracking functionality 
-        const moodOptions = document.querySelectorAll('.mood-option'); 
-        let moodData = []; 
-        let moodChart; 
-        
-        // Initialize with some sample data 
-        const today = new Date(); 
-        for (let i = 6; i >= 0; i--) { 
-            const date = new Date(today); 
-            date.setDate(date.getDate() - i); 
-            moodData.push({ 
-                date: date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'}), 
-                mood: Math.floor(Math.random() * 5) + 1 
-            }); 
-        } 
-        
-        // Initialize the mood chart 
-        function initMoodChart() { 
-            const ctx = document.getElementById('moodChart').getContext('2d'); 
-            moodChart = new Chart(ctx, { 
-                type: 'line', 
-                data: { 
-                    labels: moodData.map(data => data.date), 
-                    datasets: [{ 
-                        label: 'Mood', 
-                        data: moodData.map(data => data.mood), 
-                        backgroundColor: 'rgba(102, 126, 234, 0.2)', 
-                        borderColor: 'rgba(102, 126, 234, 1)', 
-                        borderWidth: 2, 
-                        tension: 0.3, 
-                        fill: true 
-                    }] 
-                }, 
-                options: { 
-                    scales: { 
-                        y: { 
-                            min: 1, 
-                            max: 5, 
-                            ticks: { 
-                                stepSize: 1, 
-                                callback: function(value) { 
-                                    const moodLabels = ['😢', '😕', '😐', '🙂', '😄']; 
-                                    return moodLabels[value-1]; 
-                                } 
-                            } 
-                        } 
-                    }, 
-                    plugins: { 
-                        legend: { 
-                            display: false 
-                        } 
-                    } 
-                } 
-            }); 
-        } 
-        
-        // Add event listeners to mood options 
-        moodOptions.forEach(option => { 
-            option.addEventListener('click', function() { 
-                // Remove selected class from all options 
-                moodOptions.forEach(opt => opt.classList.remove('selected')); 
+                // Check for crisis keywords and show safety alert if needed
+                checkForCrisis(message);
                 
-                // Add selected class to clicked option 
-                this.classList.add('selected'); 
+                // Update statistics
+                updateChatSessions();
+                messageCount++;
+            }, 1500 + Math.random() * 1500);
+        }
+
+        function addMessage(message, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            messageDiv.innerHTML = `
+                <div>${message}</div>
+                <div class="message-timestamp">${timeString}</div>
+                ${sender === 'ai' ? `
+                <div class="message-reactions">
+                    <button class="reaction-btn" onclick="reactToMessage(this, 'helpful')">👍</button>
+                    <button class="reaction-btn" onclick="reactToMessage(this, 'heart')">❤️</button>
+                    <button class="reaction-btn" onclick="reactToMessage(this, 'hug')">🤗</button>
+                </div>
+                ` : ''}
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Store message
+            chatMessages.push({
+                text: message,
+                sender: sender,
+                timestamp: now
+            });
+        }
+
+        function generateAIResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            let category = 'neutral';
+            let confidence = 0;
+            
+            // Determine message category using keyword matching
+            for (const [cat, keywords] of Object.entries(keywordCategories)) {
+                const matches = keywords.filter(keyword => lowerMessage.includes(keyword)).length;
+                const categoryConfidence = matches / keywords.length;
                 
-                // Update mood data for today 
-                const mood = parseInt(this.getAttribute('data-mood')); 
-                moodData[moodData.length - 1].mood = mood; 
+                if (categoryConfidence > confidence) {
+                    confidence = categoryConfidence;
+                    category = cat;
+                }
+            }
+            
+            // Get response from appropriate category
+            const responses = aiResponses[category] || aiResponses.neutral;
+            const selectedResponse = responses[Math.floor(Math.random() * responses.length)];
+            
+            return {
+                text: selectedResponse,
+                category: category,
+                confidence: confidence
+            };
+        }
+
+        function checkForCrisis(message) {
+            const lowerMessage = message.toLowerCase();
+            const crisisKeywords = keywordCategories.crisis;
+            
+            if (crisisKeywords.some(keyword => lowerMessage.includes(keyword))) {
+                setTimeout(() => {
+                    document.getElementById('safetyAlert').style.display = 'block';
+                    // Also add a supportive AI message
+                    setTimeout(() => {
+                        addMessage("I've shared some crisis resources below. Please know that reaching out for professional help is a sign of strength, not weakness. You matter, and there are people trained to help you through this.", 'ai');
+                    }, 1000);
+                }, 2000);
+            }
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'block';
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight + 50;
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        function reactToMessage(button, reaction) {
+            button.style.background = 'var(--primary-blue)';
+            button.style.color = 'white';
+            button.disabled = true;
+            
+            // Send feedback response
+            setTimeout(() => {
+                addMessage("Thank you for the feedback! It helps me provide better support. Is there anything else you'd like to talk about?", 'ai');
+            }, 500);
+        }
+
+        function updateCharCount() {
+            const input = document.getElementById('chatInput');
+            const count = input.value.length;
+            document.getElementById('charCount').textContent = count;
+            
+            const counter = document.querySelector('.input-counter');
+            if (count > 450) {
+                counter.style.color = 'var(--danger-red)';
+            } else if (count > 350) {
+                counter.style.color = 'var(--warning-yellow)';
+            } else {
+                counter.style.color = 'var(--gray-400)';
+            }
+        }
+
+        // ===== MOOD TRACKING FUNCTIONALITY =====
+        function selectMood(rating, emoji, label) {
+            // Remove previous selection
+            document.querySelectorAll('.mood-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selection to clicked mood
+            event.target.classList.add('selected');
+            
+            // Add to mood data
+            moodData.push(rating);
+            if (moodData.length > 30) {
+                moodData.shift(); // Keep only last 30 entries
+            }
+            
+            // Update chart and statistics
+            updateMoodChart();
+            updateAverageMood();
+            updateDaysTracked();
+            updateWellnessScore();
+            
+            // Generate personalized insights
+            generateMoodInsight(rating, emoji, label);
+            
+            // Add confirmation message to chat if in chat section
+            if (currentSection === 'chat') {
+                setTimeout(() => {
+                    addMessage(`Thanks for logging your mood! ${emoji} Your ${label.toLowerCase()} feeling has been recorded. Remember, every feeling is valid and temporary.`, 'ai');
+                }, 500);
+            }
+        }
+
+        function generateMoodInsight(rating, emoji, label) {
+            const insights = {
+                1: [
+                    "I notice you're feeling very sad right now. It's important to acknowledge these feelings. Consider reaching out to someone you trust.",
+                    "Very sad days are part of the human experience. Your feelings are valid. Would gentle activities like journaling or calling a friend help?",
+                    "Thank you for being honest about feeling very sad. This emotional awareness is the first step toward healing."
+                ],
+                2: [
+                    "Feeling sad is completely normal and shows emotional intelligence. What small thing might bring you a tiny bit of comfort today?",
+                    "I see you're having a sad day. These feelings often pass with time. Have you tried any coping strategies that helped before?",
+                    "Your sadness is being heard and acknowledged. Sometimes sad days help us appreciate the better ones more."
+                ],
+                3: [
+                    "Neutral feelings are perfectly valid too. Not every day needs to be amazing - sometimes 'okay' is exactly enough.",
+                    "A neutral mood can be peaceful. You're being consistent with tracking, which shows great self-awareness.",
+                    "Feeling neutral isn't boring - it can be a stable, calm baseline. How was your day overall?"
+                ],
+                4: [
+                    "I'm glad you're feeling happy today! What contributed to this positive mood? Identifying these patterns can help maintain good feelings.",
+                    "Happy moods are wonderful! Consider writing down what made today good so you can recreate these conditions.",
+                    "Your happiness is contagious, even through the screen! What's been the highlight of your day?"
+                ],
+                5: [
+                    "Very happy days are precious! You're radiating positivity. What made today so special?",
+                    "I love seeing you this happy! These peak moments are worth celebrating and remembering.",
+                    "Your joy is inspiring! Consider sharing this positive energy with someone who might need it."
+                ]
+            };
+            
+            const insightText = insights[rating][Math.floor(Math.random() * insights[rating].length)];
+            document.getElementById('insightText').innerHTML = `<strong>${emoji} ${label} Mood Insight:</strong><br>${insightText}`;
+        }
+
+        function initMoodChart() {
+            const ctx = document.getElementById('moodChart').getContext('2d');
+            moodChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: moodData.length}, (_, i) => `Day ${i + 1}`),
+                    datasets: [{
+                        label: 'Mood Rating',
+                        data: moodData,
+                        borderColor: 'var(--primary-blue)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: 'var(--primary-blue)',
+                        pointBorderColor: 'var(--white)',
+                        pointBorderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const moodLabels = {1: 'Very Sad', 2: 'Sad', 3: 'Neutral', 4: 'Happy', 5: 'Very Happy'};
+                                    return `Mood: ${context.parsed.y}/10 (${moodLabels[Math.round(context.parsed.y)]})`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    const emojis = {1: '😢', 2: '😞', 3: '😐', 4: '😊', 5: '😄'};
+                                    return emojis[value] || value;
+                                }
+                            }
+                        },
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Time Period'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateMoodChart() {
+            if (moodChart) {
+                moodChart.data.labels = Array.from({length: moodData.length}, (_, i) => `Day ${i + 1}`);
+                moodChart.data.datasets[0].data = moodData;
+                moodChart.update();
+            }
+        }
+
+        // ===== STATISTICS UPDATE FUNCTIONS =====
+        function updateAverageMood() {
+            const avg = (moodData.reduce((a, b) => a + b, 0) / moodData.length).toFixed(1);
+            document.getElementById('avgMood').textContent = avg;
+        }
+
+        function updateDaysTracked() {
+            const current = parseInt(document.getElementById('daysTracked').textContent);
+            document.getElementById('daysTracked').textContent = Math.min(current + 1, moodData.length);
+        }
+
+        function updateChatSessions() {
+            const current = parseInt(document.getElementById('chatSessions').textContent);
+            document.getElementById('chatSessions').textContent = current + 1;
+        }
+
+        function updateWellnessScore() {
+            // Calculate wellness score based on recent mood data and activity
+            const recentMoods = moodData.slice(-7); // Last 7 entries
+            const avgRecent = recentMoods.reduce((a, b) => a + b, 0) / recentMoods.length;
+            const consistency = recentMoods.length >= 5 ? 1 : 0.8; // Consistency bonus
+            const chatBonus = messageCount > 5 ? 1.1 : 1; // Engagement bonus
+            
+            const score = Math.round((avgRecent / 5) * 80 * consistency * chatBonus);
+            document.getElementById('wellnessScore').textContent = Math.min(score, 100);
+        }
+
+        // ===== TOOLKIT FUNCTIONS =====
+        function startBreathingExercise() {
+            document.getElementById('breathingModal').style.display = 'flex';
+        }
+
+        function closeBreathingModal() {
+            document.getElementById('breathingModal').style.display = 'none';
+            stopBreathingAnimation();
+        }
+
+        function startBreathingAnimation() {
+            const circle = document.getElementById('breathingCircle');
+            const text = document.getElementById('breathingText');
+            const startBtn = document.getElementById('startBreathingBtn');
+            const stopBtn = document.getElementById('stopBreathingBtn');
+            
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-block';
+            
+            let phase = 0; // 0: inhale, 1: hold, 2: exhale, 3: hold
+            const phases = ['Inhale', 'Hold', 'Exhale', 'Hold'];
+            const durations = [4000, 2000, 6000, 2000]; // 4-2-6-2 breathing pattern
+            
+            function breathe() {
+                text.textContent = phases[phase];
                 
-                // Update chart 
-                moodChart.data.datasets[0].data = moodData.map(data => data.mood); 
-                moodChart.update(); 
-            }); 
-        }); 
-        
-        // Initialize the chart when the page loads 
-        window.addEventListener('load', initMoodChart); 
-    </script> 
-</body> 
-</html>
+                if (phase === 0) { // Inhale
+                    circle.style.transform = 'scale(1.5)';
+                    circle.style.background = 'rgba(102, 126, 234, 0.3)';
+                } else if (phase === 2) { // Exhale
+                    circle.style.transform = 'scale(1)';
+                    circle.style.background = 'rgba(102, 126, 234, 0.1)';
+                }
+                
+                phase = (phase + 1) % 4;
+            }
+            
+            breathe(); // Start immediately
+            breathingInterval = setInterval(breathe, 3000); // Continue every 3 seconds
+        }
+
+        function stopBreathingAnimation() {
+            if (breathingInterval) {
+                clearInterval(breathingInterval);
+                breathingInterval = null;
+            }
+            
+            const circle = document.getElementById('breathingCircle');
+            const text = document.getElementById('breathingText');
+            const startBtn = document.getElementById('startBreathingBtn');
+            const stopBtn = document.getElementById('stopBreathingBtn');
+            
+            circle.style.transform = 'scale(1)';
+            circle.style.background = 'rgba(102, 126, 234, 0.1)';
+            text.textContent = 'Ready?';
+            
+            startBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+        }
+
+        function startMeditation() {
+            alert('🧘 Meditation feature coming soon! This would open guided meditation sessions with various themes and durations.');
+        }
+
+        function openThoughtJournal() {
+            alert('📝 Thought Journal feature coming soon! This would provide CBT-based journaling prompts and thought analysis.');
+        }
+
+        function openMoodMusic() {
+            alert('🎵 Mood Music feature coming soon! This would provide curated playlists for different emotional states.');
+        }
+
+        function openGoalSetting() {
+            alert('🎯 Goal Setting feature coming soon! This would help you set and track SMART wellness goals.');
+        }
+
+        function showCrisisResources() {
+            document.getElementById('safetyAlert').style.display = 'block';
+            document.getElementById('safetyAlert').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ===== EVENT LISTENERS =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize mood chart
+            setTimeout(initMoodChart, 1000);
+            
+            // Chat input event listeners
+            const chatInput = document.getElementById('chatInput');
+            chatInput.addEventListener('input', updateCharCount);
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // Auto-resize textarea
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+        });
+
+        // Add modal styles to document head
+        const modalStyles = document.createElement('style');
+        modalStyles.textContent = `
+            .modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+                backdrop-filter: blur(5px);
+            }
+
+            .modal-content {
+                background: var(--white);
+                border-radius: 20px;
+                padding: 30px;
+                max-width: 500px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: var(--shadow-xl);
+            }
+
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid var(--gray-200);
+            }
+
+            .modal-header h3 {
+                color: var(--gray-700);
+                font-size: 1.5rem;
+                margin: 0;
+            }
+
+            .close-btn {
+                background: none;
+                border: none;
+                font-size: 2rem;
+                cursor: pointer;
+                color: var(--gray-500);
+                padding: 0;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            }
+
+            .close-btn:hover {
+                background: var(--gray-100);
+                color: var(--gray-700);
+            }
+
+            .breathing-exercise {
+                text-align: center;
+                padding: 20px 0;
+            }
+
+            .breathing-circle {
+                width: 200px;
+                height: 200px;
+                border-radius: 50%;
+                background: rgba(102, 126, 234, 0.1);
+                border: 3px solid var(--primary-blue);
+                margin: 0 auto 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .breathing-text {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: var(--primary-blue);
+            }
+
+            .breathing-controls {
+                margin-bottom: 20px;
+            }
+
+            .breathing-controls button {
+                padding: 12px 24px;
+                margin: 0 10px;
+                background: var(--gradient-primary);
+                color: var(--white);
+                border: none;
+                border-radius: 25px;
+                cursor: pointer;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
+            .breathing-controls button:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-md);
+            }
+
+            .breathing-instructions {
+                color: var(--gray-600);
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+        `;
+        document.head.appendChild(modalStyles);
+
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            console.log('WellnessWeavers initialized successfully!');
+            
+            // Set up initial stats
+            updateAverageMood();
+            
+            // Add welcome message after a brief delay
+            setTimeout(() => {
+                if (currentSection === 'chat') {
+                    addMessage("I'm here whenever you need support, guidance, or just someone to listen. What's on your mind today?", 'ai');
+                }
+            }, 2000);
+        });
+
+        // Utility function to format large numbers
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+
+        // Auto-save functionality (simulated - in real app would sync with backend)
+        function saveUserData() {
+            const userData = {
+                moodData: moodData,
+                chatMessages: chatMessages.slice(-50), // Keep last 50 messages
+                stats: {
+                    avgMood: document.getElementById('avgMood').textContent,
+                    daysTracked: document.getElementById('daysTracked').textContent,
+                    chatSessions: document.getElementById('chatSessions').textContent,
+                    wellnessScore: document.getElementById('wellnessScore').textContent
+                },
+                lastUpdated: new Date().toISOString()
+            };
+            
+            // In a real application, this would sync with your backend
+            console.log('User data saved:', userData);
+        }
+
+        // Save data every 30 seconds
+        setInterval(saveUserData, 30000);
+
+        // Enhanced error handling
+        window.addEventListener('error', function(e) {
+            console.error('Application error:', e.error);
+            // In production, you'd want to send this to your error tracking service
+        });
+
+        // Accessibility improvements
+        document.addEventListener('keydown', function(e) {
+            // Escape key closes modals
+            if (e.key === 'Escape') {
+                const modal = document.querySelector('.modal[style*="flex"]');
+                if (modal) {
+                    modal.style.display = 'none';
+                    if (modal.id === 'breathingModal') {
+                        stopBreathingAnimation();
+                    }
+                }
+            }
+            
+            // Alt+1-4 for quick tab navigation
+            if (e.altKey && !e.shiftKey && !e.ctrlKey) {
+                const tabMap = {
+                    '1': 'chat',
+                    '2': 'mood', 
+                    '3': 'dashboard',
+                    '4': 'toolkit'
+                };
+                
+                if (tabMap[e.key]) {
+                    e.preventDefault();
+                    const tabButton = document.querySelector(`[onclick="switchTab('${tabMap[e.key]}')"]`);
+                    if (tabButton) {
+                        tabButton.click();
+                    }
+                }
+            }
+        });
+
+        // Performance monitoring
+        function measurePerformance() {
+            if ('performance' in window) {
+                const paintEntries = performance.getEntriesByType('paint');
+                paintEntries.forEach((entry) => {
+                    console.log(`${entry.name}: ${entry.startTime}ms`);
+                });
+            }
+        }
+
+        // Call performance measurement after load
+        window.addEventListener('load', measurePerformance);
+
+        // Service Worker registration for offline functionality (if implemented)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Uncomment when service worker is implemented
+                // navigator.serviceWorker.register('/sw.js')
+                //     .then(function(registration) {
+                //         console.log('SW registered: ', registration);
+                //     })
+                //     .catch(function(registrationError) {
+                //         console.log('SW registration failed: ', registrationError);
+                //     });
+            });
+        }
