@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}{{ app_name }} - Your AI-Powered Mental Health Companion{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-gradient text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    Welcome to {{ app_name }}
+                </h1>
+                <p class="lead mb-4">
+                    Your culturally-inclusive AI companion for mental health support. 
+                    Track your mood, chat with AI, build healthy habits, and access crisis support - 
+                    all in your native language.
+                </p>
+                <div class="d-flex gap-3">
+                    {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-user-plus"></i> Get Started Free
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('dashboard.index') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <i class="fas fa-brain fa-10x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="fw-bold">Comprehensive Mental Health Support</h2>
+                <p class="text-muted">Designed for India's diverse cultural landscape</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-smile-beam fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Mood Tracking</h5>
+                        <p class="card-text text-muted">
+                            Track your emotions with culturally-aware insights and personalized recommendations.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-robot fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title">AI Companion</h5>
+                        <p class="card-text text-muted">
+                            Chat with your AI companion in your native language with cultural understanding.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-microphone fa-3x text-warning"></i>
+                        </div>
+                        <h5 class="card-title">Voice Journaling</h5>
+                        <p class="card-text text-muted">
+                            Express your feelings through voice with multilingual support and emotional analysis.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-shield-alt fa-3x text-danger"></i>
+                        </div>
+                        <h5 class="card-title">Crisis Support</h5>
+                        <p class="card-text text-muted">
+                            24/7 crisis detection and immediate access to local emergency resources.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Cultural Inclusivity Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="fw-bold mb-4">Designed for India's Diversity</h2>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>25+ Languages:</strong> Support for all major Indian languages
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Cultural Context:</strong> Understands festivals, family dynamics, and social norms
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Local Resources:</strong> Connected to regional mental health services
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Privacy First:</strong> Secure, confidential, and HIPAA-compliant
+                    </li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <div class="language-grid">
+                        <span class="badge bg-primary m-1 p-2">हिंदी</span>
+                        <span class="badge bg-secondary m-1 p-2">বাংলা</span>
+                        <span class="badge bg-success m-1 p-2">தமிழ்</span>
+                        <span class="badge bg-danger m-1 p-2">తెలుగు</span>
+                        <span class="badge bg-warning m-1 p-2">ગુજરાતી</span>
+                        <span class="badge bg-info m-1 p-2">ಕನ್ನಡ</span>
+                        <span class="badge bg-dark m-1 p-2">മലയാളം</span>
+                        <span class="badge bg-primary m-1 p-2">मराठी</span>
+                        <span class="badge bg-secondary m-1 p-2">ਪੰਜਾਬੀ</span>
+                        <span class="badge bg-success m-1 p-2">ଓଡ଼ିଆ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-4">Start Your Mental Health Journey Today</h2>
+        <p class="lead mb-4">Join thousands of users who trust WellnessWeavers for their mental health support</p>
+        {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
+            <i class="fas fa-rocket"></i> Get Started Now - It's Free!
+        </a>
+        {% else %}
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-light btn-lg">
+            <i class="fas fa-arrow-right"></i> Continue to Dashboard
+        </a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Crisis Banner -->
+<div class="alert alert-danger border-0 rounded-0 mb-0 text-center" role="alert">
+    <strong>In Crisis?</strong> Call <strong>112</strong> for emergencies or <strong>9152987821</strong> for mental health crisis support
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add some interactive elements
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate feature cards on scroll
+    const cards = document.querySelectorAll('.card');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    
+    cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(card);
+    });
+});
+</script>
+{% endblock %}
+
+{% block head %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+}
+
+.feature-icon {
+    transition: transform 0.3s ease;
+}
+
+.card:hover .feature-icon {
+    transform: scale(1.1);
+}
+
+.language-grid {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 60vh;
+        text-align: center;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}

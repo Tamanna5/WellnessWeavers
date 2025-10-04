@@ -1,0 +1,349 @@
+/* WellnessWeavers Custom Styles */
+
+:root {
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+}
+
+/* Custom animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Custom utilities */
+.text-gradient {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+
+/* Card enhancements */
+.card {
+  border-radius: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* Button customizations */
+.btn {
+  border-radius: 25px;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Navigation */
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+/* Hero section */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grain)"/></svg>');
+  pointer-events: none;
+}
+
+/* Form styling */
+.form-control {
+  border-radius: 10px;
+  border: 2px solid #e9ecef;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Alert styling */
+.alert {
+  border-radius: 10px;
+  border: none;
+}
+
+/* Footer */
+footer {
+  margin-top: auto;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Dashboard specific styles */
+.dashboard-card {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  border: none;
+  height: 100%;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.stat-card .stat-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.stat-card .stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* Mood tracking specific styles */
+.mood-emoji {
+  font-size: 2rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  padding: 0.5rem;
+  border-radius: 50%;
+}
+
+.mood-emoji:hover {
+  transform: scale(1.2);
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.mood-emoji.selected {
+  background: var(--primary-color);
+  transform: scale(1.2);
+}
+
+/* Chat interface */
+.chat-container {
+  height: 500px;
+  overflow-y: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 15px;
+  padding: 1rem;
+  background: #f8f9fa;
+}
+
+.message {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 15px;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.message.user {
+  background: var(--primary-color);
+  color: white;
+  margin-left: auto;
+  text-align: right;
+}
+
+.message.ai {
+  background: white;
+  border: 1px solid #dee2e6;
+  margin-right: auto;
+}
+
+/* Voice recording */
+.voice-recorder {
+  text-align: center;
+  padding: 2rem;
+}
+
+.record-btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: none;
+  background: var(--danger-color);
+  color: white;
+  font-size: 2rem;
+  transition: all 0.3s ease;
+}
+
+.record-btn:hover {
+  transform: scale(1.1);
+  background: #c82333;
+}
+
+.record-btn.recording {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Achievement badges */
+.achievement-badge {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: #333;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Progress bars */
+.progress {
+  height: 10px;
+  border-radius: 5px;
+  background: #e9ecef;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  border-radius: 5px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .hero-section {
+    padding: 3rem 0;
+  }
+  
+  .stat-card {
+    padding: 1rem;
+  }
+  
+  .stat-card .stat-icon {
+    font-size: 2rem;
+  }
+  
+  .stat-card .stat-number {
+    font-size: 1.5rem;
+  }
+  
+  .message {
+    max-width: 85%;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .card {
+    background: #2d3748;
+    color: white;
+  }
+  
+  .form-control {
+    background: #2d3748;
+    color: white;
+    border-color: #4a5568;
+  }
+  
+  .chat-container {
+    background: #2d3748;
+    color: white;
+  }
+  
+  .message.ai {
+    background: #4a5568;
+    color: white;
+  }
+}
+
+/* Accessibility improvements */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus indicators */
+button:focus,
+.btn:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn {
+    border: 2px solid;
+  }
+  
+  .card {
+    border: 1px solid #333;
+  }
+}
