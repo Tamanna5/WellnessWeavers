@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card mt-4 shadow">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                        <h2 class="h4 mb-2">Join {{ app_name }}</h2>
+                        <p class="text-muted">Create your account and start your mental health journey</p>
+                    </div>
+
+                    <form method="POST" id="register-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">First Name *</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="first_name" 
+                                       name="first_name" 
+                                       required 
+                                       placeholder="First name">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Last Name *</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="last_name" 
+                                       name="last_name" 
+                                       required 
+                                       placeholder="Last name">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address *</label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   name="email" 
+                                   required 
+                                   placeholder="your@email.com">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="age" class="form-label">Age *</label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="age" 
+                                       name="age" 
+                                       min="13" 
+                                       max="120" 
+                                       required 
+                                       placeholder="Age">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="preferred_language" class="form-label">Preferred Language</label>
+                                <select class="form-control" id="preferred_language" name="preferred_language">
+                                    <option value="en">English</option>
+                                    <option value="hi">हिंदी (Hindi)</option>
+                                    <option value="bn">বাংলা (Bengali)</option>
+                                    <option value="te">తెలుగు (Telugu)</option>
+                                    <option value="ta">தமிழ் (Tamil)</option>
+                                    <option value="gu">ગુજરાતી (Gujarati)</option>
+                                    <option value="mr">मराठी (Marathi)</option>
+                                    <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                                    <option value="ml">മലയാളം (Malayalam)</option>
+                                    <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                                    <option value="or">ଓଡ଼ିଆ (Odia)</option>
+                                    <option value="as">অসমীয়া (Assamese)</option>
+                                    <option value="ur">اردو (Urdu)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password *</label>
+                            <div class="input-group">
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="password" 
+                                       name="password" 
+                                       required 
+                                       placeholder="Create a strong password">
+                                <button type="button" 
+                                        class="btn btn-outline-secondary" 
+                                        id="toggle-password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                Password must be at least 8 characters with uppercase, lowercase, and numbers
+                            </div>
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm Password *</label>
+                            <div class="input-group">
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="confirm_password" 
+                                       name="confirm_password" 
+                                       required 
+                                       placeholder="Confirm your password">
+                                <button type="button" 
+                                        class="btn btn-outline-secondary" 
+                                        id="toggle-confirm-password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" 
+                                       class="form-check-input" 
+                                       id="terms_accepted" 
+                                       name="terms_accepted" 
+                                       required>
+                                <label class="form-check-label" for="terms_accepted">
+                                    I agree to the <a href="#" target="_blank">Terms of Service</a> 
+                                    and <a href="#" target="_blank">Privacy Policy</a> *
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus"></i> Create Account
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center">
+                        <p class="mb-0">
+                            Already have an account? 
+                            <a href="{{ url_for('auth.login') }}" class="text-decoration-none fw-bold">
+                                Sign in here
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy Assurance -->
+            <div class="card mt-3 bg-light">
+                <div class="card-body text-center py-3">
+                    <small class="text-muted">
+                        <i class="fas fa-shield-alt text-success"></i>
+                        Your data is encrypted and secure. We never share your personal information.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Crisis Support Card -->
+            <div class="card mt-2 bg-danger text-white">
+                <div class="card-body text-center py-2">
+                    <small>
+                        <i class="fas fa-phone"></i> 
+                        <strong>In Crisis?</strong> Call 112 or 9152987821
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password toggle functionality
+    function setupPasswordToggle(toggleId, inputId) {
+        const toggle = document.getElementById(toggleId);
+        const input = document.getElementById(inputId);
+        
+        if (toggle && input) {
+            toggle.addEventListener('click', function() {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                
+                const icon = this.querySelector('i');
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            });
+        }
+    }
+
+    setupPasswordToggle('toggle-password', 'password');
+    setupPasswordToggle('toggle-confirm-password', 'confirm_password');
+
+    // Real-time password validation
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    
+    function validatePassword() {
+        const password = passwordInput.value;
+        const isValid = password.length >= 8 && 
+                       /[A-Z]/.test(password) && 
+                       /[a-z]/.test(password) && 
+                       /\d/.test(password);
+        
+        passwordInput.classList.toggle('is-valid', isValid && password.length > 0);
+        passwordInput.classList.toggle('is-invalid', !isValid && password.length > 0);
+        
+        return isValid;
+    }
+    
+    function validatePasswordMatch() {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const isMatch = password === confirmPassword && confirmPassword.length > 0;
+        
+        confirmPasswordInput.classList.toggle('is-valid', isMatch);
+        confirmPasswordInput.classList.toggle('is-invalid', !isMatch && confirmPassword.length > 0);
+        
+        return isMatch;
+    }
+
+    if (passwordInput) {
+        passwordInput.addEventListener('input', validatePassword);
+        passwordInput.addEventListener('input', validatePasswordMatch);
+    }
+    
+    if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+    }
+
+    // Form submission validation
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            const requiredFields = this.querySelectorAll('input[required], select[required]');
+            let allValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    allValid = false;
+                    field.classList.add('is-invalid');
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            // Specific validations
+            if (!validatePassword()) {
+                allValid = false;
+            }
+            
+            if (!validatePasswordMatch()) {
+                allValid = false;
+            }
+            
+            const termsAccepted = document.getElementById('terms_accepted').checked;
+            if (!termsAccepted) {
+                allValid = false;
+                alert('Please accept the Terms of Service and Privacy Policy');
+            }
+            
+            if (!allValid) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    // Auto-focus first input
+    const firstNameInput = document.getElementById('first_name');
+    if (firstNameInput) {
+        firstNameInput.focus();
+    }
+});
+</script>
+{% endblock %}

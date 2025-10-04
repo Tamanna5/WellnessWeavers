@@ -1,0 +1,99 @@
+# Core Flask and web framework dependencies
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+Flask-Migrate==4.0.5
+Flask-Login==0.6.3
+Flask-Mail==0.9.1
+Flask-WTF==1.1.1
+Flask-CORS==4.0.0
+WTForms==3.0.1
+
+# Database drivers
+SQLAlchemy==2.0.21
+pymongo==4.5.0
+psycopg2-binary==2.9.7  # PostgreSQL driver
+redis==5.0.1
+
+# Google Cloud AI services
+google-cloud-language==2.11.1
+google-cloud-speech==2.21.0
+google-cloud-translate==3.12.1
+google-cloud-storage==2.10.0
+google-generativeai==0.1.0
+
+# OpenAI integration (backup AI service)
+openai==0.28.1
+
+# Data processing and analysis
+pandas==2.1.1
+numpy==1.24.3
+scikit-learn==1.3.0
+
+# Natural Language Processing
+nltk==3.8.1
+textblob==0.17.1
+langdetect==1.0.9
+
+# Audio processing for voice features
+librosa==0.10.1
+pydub==0.25.1
+SpeechRecognition==3.10.0
+
+# Image processing
+Pillow==10.0.1
+
+# HTTP requests
+requests==2.31.0
+
+# Environment variables
+python-dotenv==1.0.0
+
+# Task queue and background jobs
+celery==5.3.2
+celery[redis]==5.3.2
+
+# Caching
+Flask-Caching==2.1.0
+
+# Rate limiting
+Flask-Limiter==3.5.0
+
+# Security
+bcrypt==4.0.1
+cryptography==41.0.7
+
+# Validation and serialization
+marshmallow==3.20.1
+marshmallow-sqlalchemy==0.29.0
+
+# Date/time utilities
+python-dateutil==2.8.2
+
+# Configuration management
+dynaconf==3.2.3
+
+# Logging
+structlog==23.1.0
+
+# Monitoring and error tracking
+sentry-sdk[flask]==1.32.0
+
+# Testing dependencies (for development)
+pytest==7.4.2
+pytest-flask==1.2.0
+pytest-cov==4.1.0
+factory-boy==3.3.0
+
+# Code quality
+flake8==6.1.0
+black==23.9.1
+
+# Documentation
+Sphinx==7.2.6
+
+# Deployment
+gunicorn==21.2.0
+waitress==2.1.2
+
+# Development utilities
+flask-shell-ipython==1.4.0
