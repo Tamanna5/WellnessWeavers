@@ -2,7 +2,7 @@
 Community and Support Group Models
 """
 
-from app import db
+from database import db
 from datetime import datetime
 
 class SupportGroup(db.Model):

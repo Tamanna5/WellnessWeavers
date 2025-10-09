@@ -14,6 +14,9 @@ from .goals import Goal, Milestone
 from .community import SupportGroup, GroupMembership, GroupPost
 from .crisis import CrisisAlert, EmergencyContact
 from .safe_features import SleepLog, ActivityLog, SocialInteraction, SafetyPlan
+from .thought_record import ThoughtRecord
+from .relapse_prevention import RelapsePrevention
+from .behavioral_activation import BehavioralActivation
 
 __all__ = [
     'User',
@@ -28,4 +31,7 @@ __all__ = [
     'SupportGroup', 'GroupMembership', 'GroupPost',
     'CrisisAlert', 'EmergencyContact',
     'SleepLog', 'ActivityLog', 'SocialInteraction', 'SafetyPlan',
+    'ThoughtRecord',
+    'RelapsePrevention',
+    'BehavioralActivation',
 ]

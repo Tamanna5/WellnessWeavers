@@ -14,6 +14,27 @@
                         <p class="text-muted">Sign in to your {{ app_name }} account</p>
                     </div>
 
+                    <!-- Firebase Authentication -->
+                    <div class="mb-4">
+                        <div class="d-grid mb-3">
+                            <button type="button" class="btn btn-primary btn-lg" id="firebase-login-btn">
+                                <i class="fab fa-google"></i> Continue with Google
+                            </button>
+                        </div>
+                        <div class="d-grid mb-3">
+                            <button type="button" class="btn btn-dark btn-lg" id="firebase-phone-btn">
+                                <i class="fas fa-phone"></i> Continue with Phone
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-3">
+                        <hr>
+                        <span class="text-muted">or</span>
+                        <hr>
+                    </div>
+
+                    <!-- Traditional Login Form -->
                     <form method="POST" id="login-form">
                         <div class="mb-3">
                             <label for="email" class="form-label">Email Address</label>
@@ -57,8 +78,8 @@
                         </div>
 
                         <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-sign-in-alt"></i> Sign In
+                            <button type="submit" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Sign In with Email
                             </button>
                         </div>
                     </form>
@@ -94,8 +115,148 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    let firebaseApp = null;
+    let firebaseAuth = null;
+    
+    // Initialize Firebase
+    async function initializeFirebase() {
+        try {
+            const response = await fetch('/auth/firebase/config');
+            const config = await response.json();
+            
+            if (config.success && config.config && config.config.apiKey && config.config.apiKey !== 'dummy-key') {
+                firebaseApp = firebase.initializeApp(config.config);
+                firebaseAuth = firebase.auth();
+                firebaseAuth.onAuthStateChanged(handleAuthStateChange);
+                enableFirebaseButtons(true);
+            } else {
+                enableFirebaseButtons(false);
+                console.warn('Firebase not fully configured. Hiding social login.');
+            }
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            enableFirebaseButtons(false);
+        }
+    }
+    
+    // Handle authentication state changes
+    function handleAuthStateChange(user) {
+        if (user) {
+            // User is signed in
+            user.getIdToken().then(idToken => {
+                authenticateWithBackend(idToken);
+            });
+        }
+    }
+    
+    // Authenticate with backend
+    async function authenticateWithBackend(idToken) {
+        try {
+            const response = await fetch('/auth/firebase/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ idToken: idToken })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Redirect to dashboard
+                window.location.href = '/dashboard';
+            } else {
+                console.error('Authentication failed:', result.error);
+                showError(result.error);
+            }
+        } catch (error) {
+            console.error('Backend authentication error:', error);
+            showError('Authentication failed. Please try again.');
+        }
+    }
+    
+    // Google Sign-In
+    document.getElementById('firebase-login-btn').addEventListener('click', function() {
+        if (!firebaseAuth) {
+            showError('Firebase not initialized. Please refresh the page.');
+            return;
+        }
+        
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        
+        firebaseAuth.signInWithPopup(provider).catch(function(error) {
+            console.error('Google sign-in error:', error);
+            showError('Google sign-in failed. Please try again.');
+        });
+    });
+    
+    // Phone Sign-In
+    document.getElementById('firebase-phone-btn').addEventListener('click', function() {
+        if (!firebaseAuth) {
+            showError('Firebase not initialized. Please refresh the page.');
+            return;
+        }
+        
+        const phoneNumber = prompt('Enter your phone number (with country code):');
+        if (!phoneNumber) return;
+        
+        const appVerifier = new firebase.auth.RecaptchaVerifier('firebase-phone-btn', {
+            'size': 'invisible'
+        });
+        
+        firebaseAuth.signInWithPhoneNumber(phoneNumber, appVerifier)
+            .then(function(confirmationResult) {
+                const code = prompt('Enter the verification code sent to your phone:');
+                if (code) {
+                    return confirmationResult.confirm(code);
+                }
+            })
+            .catch(function(error) {
+                console.error('Phone sign-in error:', error);
+                showError('Phone sign-in failed. Please try again.');
+            });
+    });
+    
+    // Show error message
+    function showError(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const container = document.querySelector('.card-body');
+        container.insertBefore(alertDiv, container.firstChild);
+    }
+
+    // Enable/disable Firebase buttons depending on config
+    function enableFirebaseButtons(enabled) {
+        const googleBtn = document.getElementById('firebase-login-btn');
+        const phoneBtn = document.getElementById('firebase-phone-btn');
+        if (!enabled) {
+            if (googleBtn) { googleBtn.disabled = true; googleBtn.classList.add('disabled'); }
+            if (phoneBtn) { phoneBtn.disabled = true; phoneBtn.classList.add('disabled'); }
+            const note = document.createElement('div');
+            note.className = 'alert alert-warning';
+            note.textContent = 'Google/Phone sign-in is unavailable until Firebase is configured.';
+            const container = document.querySelector('.card-body');
+            container.insertBefore(note, container.firstChild);
+        } else {
+            if (googleBtn) { googleBtn.disabled = false; googleBtn.classList.remove('disabled'); }
+            if (phoneBtn) { phoneBtn.disabled = false; phoneBtn.classList.remove('disabled'); }
+        }
+    }
+    
     // Password toggle functionality
     const togglePassword = document.getElementById('toggle-password');
     const passwordInput = document.getElementById('password');
@@ -130,6 +291,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (emailInput) {
         emailInput.focus();
     }
+    
+    // Initialize Firebase
+    initializeFirebase();
 });
 </script>
 {% endblock %}

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat - WellnessWeavers</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>body{background:#000;color:#fff}</style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="persona-selector">
+                <select id="personaSelect" onchange="changePersona()">
+                    <option value="Priya">Priya (Empathetic Friend)</option>
+                    <option value="Aarav">Aarav (Wise Mentor)</option>
+                    <option value="Dr. Sharma">Dr. Sharma (Professional)</option>
+                    <option value="Ravi">Ravi (Cheerleader)</option>
+                    <option value="Meera">Meera (Spiritual Guide)</option>
+                </select>
+            </div>
+            <button class="crisis-btn" onclick="showCrisisHelp()">
+                <i class="fas fa-exclamation-triangle"></i> Need Help Now?
+            </button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages"></div>
+
+        <div class="chat-input-container">
+            <textarea id="messageInput" placeholder="Type your message..." rows="3"></textarea>
+            <button onclick="sendMessage()" class="send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {{ firebase_config | tojson }};
+        if (firebaseConfig && firebaseConfig.apiKey) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        let currentUser = null;
+        let currentPersona = 'Priya';
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                loadConversationHistory();
+            }
+        });
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+            addMessage(message, 'user');
+            input.value = '';
+            showTypingIndicator();
+            try {
+                const resp = await fetch('/api/chat/message', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ message, uid: currentUser ? currentUser.uid : 'anon', persona: currentPersona })
+                });
+                const data = await resp.json();
+                removeTypingIndicator();
+                addMessage(data.message, 'ai', data);
+            } catch (e) { removeTypingIndicator(); addMessage('Error, try again.', 'ai'); }
+        }
+
+        function addMessage(text, sender, data={}) {
+            const c = document.getElementById('chatMessages');
+            const d = document.createElement('div');
+            d.className = `message ${sender}-message`;
+            const t = new Date().toLocaleTimeString();
+            d.innerHTML = `<div class="message-content">${text}</div><div class="message-time">${t}</div>`;
+            c.appendChild(d); c.scrollTop = c.scrollHeight;
+        }
+        function showTypingIndicator(){const c=document.getElementById('chatMessages');const i=document.createElement('div');i.className='typing-indicator';i.id='typingIndicator';i.innerHTML='<span></span><span></span><span></span>';c.appendChild(i);c.scrollTop=c.scrollHeight;}
+        function removeTypingIndicator(){const i=document.getElementById('typingIndicator');if(i)i.remove();}
+        function changePersona(){currentPersona=document.getElementById('personaSelect').value;addMessage(`You\'ve switched to talking with ${currentPersona}`, 'system');}
+        async function loadConversationHistory(){try{const r=await fetch(`/api/chat/history/${currentUser?currentUser.uid:'anon'}?limit=10`);const d=await r.json();(d.history||[]).reverse().forEach(m=>{addMessage(m.message,'user');addMessage(m.response,'ai');});}catch(e){}}
+        function showCrisisHelp(){alert('If you are in crisis, call 112 or local helplines.');}
+        document.getElementById('messageInput').addEventListener('keypress',(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
+    </script>
+</body>
+</html>
+
+

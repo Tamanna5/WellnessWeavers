@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Relapse Prevention - WellnessWeavers{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Relapse Prevention</h2>
+            <p class="text-muted">Track your recovery and identify early warning signs</p>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-success">{{ prevention_plan.days_stable }}</h3>
+                            <p class="card-text">Days Stable</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-info">{{ prevention_plan.risk_level|title }}</h3>
+                            <p class="card-text">Current Risk Level</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Your Warning Signs</h5>
+                </div>
+                <div class="card-body">
+                    {% if prevention_plan.personal_warning_signs %}
+                        <ul class="list-group list-group-flush">
+                            {% for sign in prevention_plan.personal_warning_signs %}
+                            <li class="list-group-item">{{ sign }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No warning signs identified yet. Update your plan to add them.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Effective Interventions</h5>
+                </div>
+                <div class="card-body">
+                    {% if prevention_plan.effective_interventions %}
+                        <ul class="list-group list-group-flush">
+                            {% for intervention in prevention_plan.effective_interventions %}
+                            <li class="list-group-item">{{ intervention }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No interventions identified yet. Update your plan to add them.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Support System</h5>
+                </div>
+                <div class="card-body">
+                    {% if prevention_plan.support_people %}
+                        <ul class="list-group list-group-flush">
+                            {% for person in prevention_plan.support_people %}
+                            <li class="list-group-item">{{ person }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No support people identified yet. Update your plan to add them.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>Update Your Plan</h4>
+                <a href="{{ url_for('therapy_tools.update_relapse_prevention') }}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Update Plan
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Recovery Insights</h5>
+                </div>
+                <div class="card-body">
+                    {% if prevention_plan.insights %}
+                        {% for insight in prevention_plan.insights %}
+                        <div class="alert alert-{{ 'success' if insight.type == 'positive' else 'warning' if insight.type == 'concern' else 'info' }} mb-3">
+                            <strong>{{ insight.message }}</strong>
+                            <br><small>{{ insight.suggestion }}</small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Complete your plan to get personalized insights.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>What is Relapse Prevention?</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small">Relapse prevention helps you:</p>
+                    <ul class="small">
+                        <li>Recognize early warning signs</li>
+                        <li>Use effective coping strategies</li>
+                        <li>Maintain your recovery</li>
+                        <li>Get help when needed</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

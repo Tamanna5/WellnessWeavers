@@ -3,7 +3,7 @@ Conversation Model for WellnessWeavers
 AI Chat interactions with comprehensive analysis and context tracking
 """
 
-from app import db
+from database import db
 from datetime import datetime
 import json
 
@@ -371,6 +371,53 @@ class Conversation(db.Model):
             'interventions_triggered': len([c for c in conversations if c.intervention_triggered]),
             'total_conversation_value': sum(c.calculate_conversation_value() for c in conversations)
         }
+    
+    @classmethod
+    def get_user_conversation_stats(cls, user_id, days=30):
+        """Get conversation statistics for a user over specified days"""
+        from datetime import timedelta
+        
+        start_date = datetime.utcnow() - timedelta(days=days)
+        conversations = cls.query.filter(
+            cls.user_id == user_id,
+            cls.created_at >= start_date
+        ).all()
+        
+        if not conversations:
+            return {
+                'total_conversations': 0,
+                'average_sentiment': 0,
+                'most_discussed_topics': [],
+                'risk_distribution': {},
+                'therapeutic_techniques_used': {},
+                'average_satisfaction': 0,
+                'interventions_triggered': 0,
+                'total_conversation_value': 0
+            }
+        
+        return cls.get_user_conversation_analytics(user_id, days)
+    
+    @classmethod
+    def get_user_active_sessions(cls, user_id):
+        """Get user's active chat sessions"""
+        # Get recent sessions (last 24 hours)
+        from datetime import timedelta
+        
+        recent_time = datetime.utcnow() - timedelta(hours=24)
+        sessions = cls.query.filter(
+            cls.user_id == user_id,
+            cls.created_at >= recent_time
+        ).order_by(cls.created_at.desc()).all()
+        
+        # Group by session_id
+        session_groups = {}
+        for conv in sessions:
+            session_id = conv.session_id or f"session_{conv.id}"
+            if session_id not in session_groups:
+                session_groups[session_id] = []
+            session_groups[session_id].append(conv)
+        
+        return session_groups
     
     def __repr__(self):
         return f'<Conversation {self.id}: {self.topic or "General"} - {self.sentiment}>'

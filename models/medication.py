@@ -3,7 +3,7 @@ Medication Tracking Models for WellnessWeavers
 Safe medication management and adherence tracking
 """
 
-from app import db
+from database import db
 from datetime import datetime, date, timedelta
 import json
 

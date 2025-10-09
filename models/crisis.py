@@ -3,7 +3,7 @@ Crisis Support Models for WellnessWeavers
 Emergency detection, intervention, and safety planning
 """
 
-from app import db
+from database import db
 from datetime import datetime
 import json
 

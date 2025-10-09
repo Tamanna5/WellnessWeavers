@@ -1,0 +1,396 @@
+{% extends "base.html" %}
+
+{% block title %}Log Mood - WellnessWeavers{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.index') }}">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.analytics') }}">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.chat') }}">
+                            <i class="fas fa-comments"></i> AI Chat
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.voice_journal') }}">
+                            <i class="fas fa-microphone"></i> Voice Journal
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.profile') }}">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.settings') }}">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 col-lg-10 main-content">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Log Your Mood</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">How are you feeling right now?</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" id="moodForm">
+                                <!-- Mood Score -->
+                                <div class="mb-4">
+                                    <label class="form-label">Mood Score (1-10)</label>
+                                    <div class="mood-scale">
+                                        <div class="mood-options d-flex justify-content-between">
+                                            <label class="mood-option">
+                                                <input type="radio" name="mood_score" value="1" class="mood-radio">
+                                                <div class="mood-emoji">😢</div>
+                                                <div class="mood-label">1</div>
+                                            </label>
+                                            <label class="mood-option">
+                                                <input type="radio" name="mood_score" value="2" class="mood-radio">
+                                                <div class="mood-emoji">😔</div>
+                                                <div class="mood-label">2</div>
+                                            </label>
+                                            <label class="mood-option">
+                                                <input type="radio" name="mood_score" value="3" class="mood-radio">
+                                                <div class="mood-emoji">😕</div>
+                                                <div class="mood-label">3</div>
+                                            </label>
+                                            <label class="mood-option">
+                                                <input type="radio" name="mood_score" value="4" class="mood-radio">
+                                                <div class="mood-emoji">😐</div>
+                                                <div class="mood-label">4</div>
+                                            </label>
+                                            <label class="mood-option">
+                                                <input type="radio" name="mood_score" value="5" class="mood-radio">
+                                                <div class="mood-emoji">🙂</div>
+                                                <div class="mood-label">5</div>
+                                            </label>
+                                            <label class="mood-option">
+                                                <input type="radio" name="mood_score" value="6" class="mood-radio">
+                                                <div class="mood-emoji">😊</div>
+                                                <div class="mood-label">6</div>
+                                            </label>
+                                            <label class="mood-option">
+                                                <input type="radio" name="mood_score" value="7" class="mood-radio">
+                                                <div class="mood-emoji">😄</div>
+                                                <div class="mood-label">7</div>
+                                            </label>
+                                            <label class="mood-option">
+                                                <input type="radio" name="mood_score" value="8" class="mood-radio">
+                                                <div class="mood-emoji">😁</div>
+                                                <div class="mood-label">8</div>
+                                            </label>
+                                            <label class="mood-option">
+                                                <input type="radio" name="mood_score" value="9" class="mood-radio">
+                                                <div class="mood-emoji">🤩</div>
+                                                <div class="mood-label">9</div>
+                                            </label>
+                                            <label class="mood-option">
+                                                <input type="radio" name="mood_score" value="10" class="mood-radio">
+                                                <div class="mood-emoji">🥳</div>
+                                                <div class="mood-label">10</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Mood Label -->
+                                <div class="mb-4">
+                                    <label class="form-label">Mood Description</label>
+                                    <select class="form-select" name="mood_label" required>
+                                        <option value="">Select a mood...</option>
+                                        <option value="terrible">Terrible</option>
+                                        <option value="bad">Bad</option>
+                                        <option value="okay">Okay</option>
+                                        <option value="good">Good</option>
+                                        <option value="great">Great</option>
+                                        <option value="amazing">Amazing</option>
+                                    </select>
+                                </div>
+
+                                <!-- Intensity -->
+                                <div class="mb-4">
+                                    <label class="form-label">Intensity (1-10)</label>
+                                    <input type="range" class="form-range" name="intensity" min="1" max="10" value="5" id="intensitySlider">
+                                    <div class="d-flex justify-content-between">
+                                        <small>Low</small>
+                                        <span id="intensityValue">5</span>
+                                        <small>High</small>
+                                    </div>
+                                </div>
+
+                                <!-- Energy Level -->
+                                <div class="mb-4">
+                                    <label class="form-label">Energy Level</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <input type="range" class="form-range" name="energy_level" min="1" max="10" value="5" id="energySlider">
+                                            <div class="d-flex justify-content-between">
+                                                <small>Low</small>
+                                                <span id="energyValue">5</span>
+                                                <small>High</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Stress Level -->
+                                <div class="mb-4">
+                                    <label class="form-label">Stress Level</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <input type="range" class="form-range" name="stress_level" min="1" max="10" value="5" id="stressSlider">
+                                            <div class="d-flex justify-content-between">
+                                                <small>Low</small>
+                                                <span id="stressValue">5</span>
+                                                <small>High</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Activities -->
+                                <div class="mb-4">
+                                    <label class="form-label">What were you doing?</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="activities" value="work" id="activity_work">
+                                                <label class="form-check-label" for="activity_work">Work</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="activities" value="exercise" id="activity_exercise">
+                                                <label class="form-check-label" for="activity_exercise">Exercise</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="activities" value="social" id="activity_social">
+                                                <label class="form-check-label" for="activity_social">Socializing</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="activities" value="hobby" id="activity_hobby">
+                                                <label class="form-check-label" for="activity_hobby">Hobby</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="activities" value="relaxation" id="activity_relaxation">
+                                                <label class="form-check-label" for="activity_relaxation">Relaxation</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="activities" value="family" id="activity_family">
+                                                <label class="form-check-label" for="activity_family">Family Time</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="activities" value="learning" id="activity_learning">
+                                                <label class="form-check-label" for="activity_learning">Learning</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="activities" value="other" id="activity_other">
+                                                <label class="form-check-label" for="activity_other">Other</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Notes -->
+                                <div class="mb-4">
+                                    <label class="form-label">Additional Notes (Optional)</label>
+                                    <textarea class="form-control" name="notes" rows="4" placeholder="How are you feeling? What's on your mind? Any specific thoughts or emotions you'd like to record?"></textarea>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-save"></i> Save Mood Entry
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    border-right: 1px solid #dee2e6;
+}
+
+.sidebar .nav-link {
+    color: #495057;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 0.25rem;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #e9ecef;
+}
+
+.sidebar .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.mood-scale {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+
+.mood-options {
+    gap: 0.5rem;
+}
+
+.mood-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    flex: 1;
+    text-align: center;
+}
+
+.mood-option:hover {
+    background-color: #e9ecef;
+}
+
+.mood-option input[type="radio"] {
+    display: none;
+}
+
+.mood-option input[type="radio"]:checked + .mood-emoji {
+    transform: scale(1.2);
+}
+
+.mood-option input[type="radio"]:checked ~ .mood-label {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.mood-emoji {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    transition: transform 0.2s;
+}
+
+.mood-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.form-range {
+    margin: 1rem 0;
+}
+
+.form-range::-webkit-slider-thumb {
+    background-color: #007bff;
+}
+
+.form-range::-moz-range-thumb {
+    background-color: #007bff;
+    border: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle mood radio buttons
+    document.querySelectorAll('.mood-radio').forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Update mood label based on score
+            const score = parseInt(this.value);
+            const moodLabelSelect = document.querySelector('select[name="mood_label"]');
+            
+            if (score <= 2) {
+                moodLabelSelect.value = 'terrible';
+            } else if (score <= 4) {
+                moodLabelSelect.value = 'bad';
+            } else if (score <= 6) {
+                moodLabelSelect.value = 'okay';
+            } else if (score <= 8) {
+                moodLabelSelect.value = 'good';
+            } else {
+                moodLabelSelect.value = 'great';
+            }
+        });
+    });
+    
+    // Handle intensity slider
+    const intensitySlider = document.getElementById('intensitySlider');
+    const intensityValue = document.getElementById('intensityValue');
+    
+    intensitySlider.addEventListener('input', function() {
+        intensityValue.textContent = this.value;
+    });
+    
+    // Handle energy slider
+    const energySlider = document.getElementById('energySlider');
+    const energyValue = document.getElementById('energyValue');
+    
+    energySlider.addEventListener('input', function() {
+        energyValue.textContent = this.value;
+    });
+    
+    // Handle stress slider
+    const stressSlider = document.getElementById('stressSlider');
+    const stressValue = document.getElementById('stressValue');
+    
+    stressSlider.addEventListener('input', function() {
+        stressValue.textContent = this.value;
+    });
+    
+    // Form validation
+    document.getElementById('moodForm').addEventListener('submit', function(e) {
+        const moodScore = document.querySelector('input[name="mood_score"]:checked');
+        const moodLabel = document.querySelector('select[name="mood_label"]');
+        
+        if (!moodScore) {
+            e.preventDefault();
+            alert('Please select a mood score!');
+            return;
+        }
+        
+        if (!moodLabel.value) {
+            e.preventDefault();
+            alert('Please select a mood description!');
+            return;
+        }
+    });
+});
+</script>
+{% endblock %}

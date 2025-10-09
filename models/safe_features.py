@@ -3,7 +3,7 @@ Safe Features Models for WellnessWeavers
 Clinical-safe features with proper oversight and boundaries
 """
 
-from app import db
+from database import db
 from datetime import datetime, date, timedelta
 import json
 

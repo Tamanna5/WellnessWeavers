@@ -2,14 +2,16 @@
 Authentication routes for WellnessWeavers
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.urls import url_parse
+from urllib.parse import urlparse
 import re
 from datetime import datetime, timedelta
 
-from models import User, db
+from models import User
+from database import db
+from services.firebase_auth import firebase_auth_service
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -151,7 +153,7 @@ def login():
         
         # Redirect to next page or dashboard
         next_page = request.args.get('next')
-        if not next_page or url_parse(next_page).netloc != '':
+        if not next_page or urlparse(next_page).netloc != '':
             next_page = url_for('dashboard.index')
         return redirect(next_page)
     
@@ -216,3 +218,133 @@ def resend_verification():
     # TODO: Implement email verification resend
     flash('Email verification resend functionality is not yet implemented', 'info')
     return redirect(url_for('dashboard.index'))
+
+# Firebase Authentication Routes
+@auth_bp.route('/firebase/login', methods=['POST'])
+def firebase_login():
+    """Firebase authentication login"""
+    try:
+        data = request.get_json()
+        id_token = data.get('idToken')
+        
+        if not id_token:
+            return jsonify({'error': 'ID token is required'}), 400
+        
+        # Authenticate user with Firebase
+        user = firebase_auth_service.authenticate_user(id_token)
+        
+        if not user:
+            return jsonify({'error': 'Authentication failed'}), 401
+        
+        # Sync user data to Firestore
+        firebase_auth_service.sync_user_data_to_firestore(user.id)
+        
+        return jsonify({
+            'success': True,
+            'user': user.to_dict(include_sensitive=False),
+            'message': f'Welcome back, {user.full_name or user.username}!'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/firebase/register', methods=['POST'])
+def firebase_register():
+    """Firebase authentication registration"""
+    try:
+        data = request.get_json()
+        id_token = data.get('idToken')
+        additional_data = data.get('additionalData', {})
+        
+        if not id_token:
+            return jsonify({'error': 'ID token is required'}), 400
+        
+        # Authenticate user with Firebase
+        user = firebase_auth_service.authenticate_user(id_token)
+        
+        if not user:
+            return jsonify({'error': 'Authentication failed'}), 401
+        
+        # Update user with additional data if provided
+        if additional_data:
+            if 'username' in additional_data:
+                user.username = additional_data['username']
+            if 'age_range' in additional_data:
+                user.age_range = additional_data['age_range']
+            if 'gender' in additional_data:
+                user.gender = additional_data['gender']
+            if 'cultural_background' in additional_data:
+                user.cultural_background = additional_data['cultural_background']
+            if 'location_city' in additional_data:
+                user.location_city = additional_data['location_city']
+            
+            db.session.commit()
+        
+        # Sync user data to Firestore
+        firebase_auth_service.sync_user_data_to_firestore(user.id)
+        
+        return jsonify({
+            'success': True,
+            'user': user.to_dict(include_sensitive=False),
+            'message': f'Welcome to WellnessWeavers, {user.full_name or user.username}!'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/firebase/config')
+def firebase_config():
+    """Get Firebase configuration for client-side"""
+    try:
+        config = firebase_auth_service.get_pyrebase_config()
+        return jsonify({
+            'success': True,
+            'config': config
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/firebase/custom-token')
+@login_required
+def firebase_custom_token():
+    """Get custom Firebase token for current user"""
+    try:
+        additional_claims = {
+            'subscription_tier': current_user.subscription_tier,
+            'wellness_score': current_user.wellness_score,
+            'level': current_user.level
+        }
+        
+        custom_token = firebase_auth_service.create_custom_token(
+            current_user.id, 
+            additional_claims
+        )
+        
+        if not custom_token:
+            return jsonify({'error': 'Failed to create custom token'}), 500
+        
+        return jsonify({
+            'success': True,
+            'customToken': custom_token
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/firebase/sync')
+@login_required
+def firebase_sync():
+    """Sync current user data to Firestore"""
+    try:
+        success = firebase_auth_service.sync_user_data_to_firestore(current_user.id)
+        
+        if not success:
+            return jsonify({'error': 'Failed to sync data'}), 500
+        
+        return jsonify({
+            'success': True,
+            'message': 'Data synced successfully'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

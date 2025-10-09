@@ -3,7 +3,7 @@ Habit Tracker Models for WellnessWeavers
 Comprehensive habit management with tracking and insights
 """
 
-from app import db
+from database import db
 from datetime import datetime, date, timedelta
 import json
 

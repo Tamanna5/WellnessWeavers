@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Community - WellnessWeavers{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.index') }}">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.analytics') }}">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.chat') }}">
+                            <i class="fas fa-comments"></i> AI Chat
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('community.index') }}">
+                            <i class="fas fa-users"></i> Community
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.profile') }}">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 col-lg-10 main-content">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Community Support</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('community.create_group') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Group
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">My Groups</h5>
+                            <div class="display-4 text-primary">{{ user_groups|length }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Recent Posts</h5>
+                            <div class="display-4 text-success">{{ recent_posts|length }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Support Groups</h5>
+                            <div class="display-4 text-info">{{ recommended_groups|length }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Community</h5>
+                            <div class="display-4 text-warning">Active</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Groups -->
+            {% if user_groups %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">My Support Groups</h5>
+                            <a href="{{ url_for('community.my_groups') }}" class="btn btn-outline-primary btn-sm">View All</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for group in user_groups[:6] %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ group.name }}</h6>
+                                            <p class="card-text">{{ group.description[:100] }}{% if group.description|length > 100 %}...{% endif %}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-users"></i> {{ group.member_count }} members
+                                                </small>
+                                                <a href="{{ url_for('community.group_detail', group_id=group.id) }}" class="btn btn-outline-primary btn-sm">View</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Recent Posts -->
+            {% if recent_posts %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Recent Community Activity</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for post in recent_posts[:5] %}
+                            <div class="post-item d-flex justify-content-between align-items-start mb-3">
+                                <div class="post-content">
+                                    <h6 class="post-title">{{ post.title }}</h6>
+                                    <p class="post-preview">{{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user"></i> {{ post.user.full_name if not post.is_anonymous else 'Anonymous' }}
+                                        <i class="fas fa-clock"></i> {{ post.created_at.strftime('%b %d, %Y') }}
+                                    </small>
+                                </div>
+                                <a href="{{ url_for('community.post_detail', post_id=post.id) }}" class="btn btn-outline-primary btn-sm">Read</a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Recommended Groups -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Recommended Support Groups</h5>
+                            <a href="{{ url_for('community.groups') }}" class="btn btn-outline-primary btn-sm">Browse All</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for group in recommended_groups %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h6 class="card-title">{{ group.name }}</h6>
+                                                <span class="badge bg-secondary">{{ group.category }}</span>
+                                            </div>
+                                            <p class="card-text">{{ group.description[:100] }}{% if group.description|length > 100 %}...{% endif %}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-users"></i> {{ group.member_count }} members
+                                                </small>
+                                                <a href="{{ url_for('community.group_detail', group_id=group.id) }}" class="btn btn-outline-primary btn-sm">Join</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    border-right: 1px solid #dee2e6;
+}
+
+.sidebar .nav-link {
+    color: #495057;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 0.25rem;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #e9ecef;
+}
+
+.sidebar .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.post-item {
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+}
+
+.post-title {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.post-preview {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - WellnessWeavers{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.index') }}">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('dashboard.analytics') }}">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.chat') }}">
+                            <i class="fas fa-comments"></i> AI Chat
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.voice_journal') }}">
+                            <i class="fas fa-microphone"></i> Voice Journal
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.profile') }}">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.settings') }}">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 col-lg-10 main-content">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Analytics & Insights</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-outline-secondary" onclick="updateChart(7)">7 Days</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="updateChart(30)">30 Days</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="updateChart(90)">90 Days</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Average Mood</h5>
+                            <div class="display-4 text-primary">{{ "%.1f"|format(mood_stats.average_mood) }}</div>
+                            <p class="card-text">out of 10</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Entries</h5>
+                            <div class="display-4 text-success">{{ mood_stats.total_entries }}</div>
+                            <p class="card-text">mood entries</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Best Day</h5>
+                            <div class="display-4 text-warning">{{ "%.1f"|format(mood_stats.best_mood) }}</div>
+                            <p class="card-text">mood score</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Consistency</h5>
+                            <div class="display-4 text-info">{{ "%.0f"|format(mood_stats.consistency_score) }}%</div>
+                            <p class="card-text">tracking rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mood Chart -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Mood Trends</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="moodChart" width="400" height="100"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Analysis -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Weekly Mood Analysis</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="weeklyChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Mood Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="distributionChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insights -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">AI Insights</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="insights-container">
+                                {% if mood_patterns %}
+                                    {% for pattern in mood_patterns %}
+                                    <div class="insight-item mb-3">
+                                        <div class="d-flex align-items-start">
+                                            <div class="insight-icon me-3">
+                                                {% if pattern.type == 'positive' %}
+                                                    <i class="fas fa-thumbs-up text-success fa-2x"></i>
+                                                {% elif pattern.type == 'concern' %}
+                                                    <i class="fas fa-exclamation-triangle text-warning fa-2x"></i>
+                                                {% else %}
+                                                    <i class="fas fa-info-circle text-info fa-2x"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="insight-content">
+                                                <h6 class="insight-title">{{ pattern.title }}</h6>
+                                                <p class="insight-description">{{ pattern.description }}</p>
+                                                {% if pattern.suggestion %}
+                                                    <div class="insight-suggestion">
+                                                        <strong>Suggestion:</strong> {{ pattern.suggestion }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">Keep tracking your mood to unlock personalized insights!</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    border-right: 1px solid #dee2e6;
+}
+
+.sidebar .nav-link {
+    color: #495057;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 0.25rem;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #e9ecef;
+}
+
+.sidebar .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.insight-item {
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+}
+
+.insight-title {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.insight-description {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.insight-suggestion {
+    color: #6c757d;
+    font-size: 0.875rem;
+    font-style: italic;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let moodChart, weeklyChart, distributionChart;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize charts
+    initializeMoodChart();
+    initializeWeeklyChart();
+    initializeDistributionChart();
+});
+
+function initializeMoodChart() {
+    const ctx = document.getElementById('moodChart').getContext('2d');
+    moodChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Mood Score',
+                data: [],
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 10
+                }
+            }
+        }
+    });
+    
+    updateChart(30); // Load 30 days by default
+}
+
+function initializeWeeklyChart() {
+    const ctx = document.getElementById('weeklyChart').getContext('2d');
+    weeklyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ weekly_data|map(attribute='week')|list|tojson }},
+            datasets: [{
+                label: 'Average Mood',
+                data: {{ weekly_data|map(attribute='average_mood')|list|tojson }},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 10
+                }
+            }
+        }
+    });
+}
+
+function initializeDistributionChart() {
+    const ctx = document.getElementById('distributionChart').getContext('2d');
+    distributionChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Happy', 'Good', 'Neutral', 'Sad', 'Terrible'],
+            datasets: [{
+                data: [30, 25, 20, 15, 10], // Sample data - replace with real data
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.8)',
+                    'rgba(23, 162, 184, 0.8)',
+                    'rgba(255, 193, 7, 0.8)',
+                    'rgba(220, 53, 69, 0.8)',
+                    'rgba(108, 117, 125, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function updateChart(days) {
+    fetch(`{{ url_for('dashboard.mood_chart_data') }}?days=${days}`)
+        .then(response => response.json())
+        .then(data => {
+            const labels = data.map(item => item.date);
+            const scores = data.map(item => item.mood_score);
+            
+            moodChart.data.labels = labels;
+            moodChart.data.datasets[0].data = scores;
+            moodChart.update();
+        })
+        .catch(error => {
+            console.error('Error loading chart data:', error);
+        });
+}
+</script>
+{% endblock %}

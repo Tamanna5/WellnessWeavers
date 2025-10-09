@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - WellnessWeavers{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('dashboard.index') }}">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.analytics') }}">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.chat') }}">
+                            <i class="fas fa-comments"></i> AI Chat
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.voice_journal') }}">
+                            <i class="fas fa-microphone"></i> Voice Journal
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.profile') }}">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.settings') }}">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 col-lg-10 main-content">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Welcome back, {{ current_user.full_name or current_user.username }}!</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickMoodModal">
+                        <i class="fas fa-plus"></i> Quick Mood
+                    </button>
+                </div>
+            </div>
+
+            <!-- Wellness Score Card -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card wellness-score-card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Wellness Score</h5>
+                            <div class="wellness-circle">
+                                <div class="score">{{ "%.0f"|format(current_user.wellness_score) }}</div>
+                                <div class="label">out of 100</div>
+                            </div>
+                            <p class="card-text mt-3">
+                                {% if current_user.wellness_score >= 80 %}
+                                    <span class="text-success">Excellent! Keep it up!</span>
+                                {% elif current_user.wellness_score >= 60 %}
+                                    <span class="text-info">Good progress!</span>
+                                {% elif current_user.wellness_score >= 40 %}
+                                    <span class="text-warning">Room for improvement</span>
+                                {% else %}
+                                    <span class="text-danger">Let's work on this together</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Streak</h5>
+                            <div class="streak-display">
+                                <i class="fas fa-fire text-danger"></i>
+                                <span class="streak-number">{{ current_user.streak_days }}</span>
+                                <div class="streak-label">days</div>
+                            </div>
+                            <p class="card-text">Keep your streak alive!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Level</h5>
+                            <div class="level-display">
+                                <i class="fas fa-star text-warning"></i>
+                                <span class="level-number">{{ current_user.level }}</span>
+                                <div class="level-label">Level</div>
+                            </div>
+                            <p class="card-text">{{ current_user.total_points }} total points</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Recent Mood Entries</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_moods %}
+                                <div class="mood-entries">
+                                    {% for mood in recent_moods %}
+                                    <div class="mood-entry d-flex justify-content-between align-items-center mb-3">
+                                        <div class="mood-info">
+                                            <div class="mood-score">
+                                                <span class="mood-emoji">
+                                                    {% if mood.mood_score >= 8 %}
+                                                        😊
+                                                    {% elif mood.mood_score >= 6 %}
+                                                        🙂
+                                                    {% elif mood.mood_score >= 4 %}
+                                                        😐
+                                                    {% elif mood.mood_score >= 2 %}
+                                                        😔
+                                                    {% else %}
+                                                        😢
+                                                    {% endif %}
+                                                </span>
+                                                <span class="mood-label">{{ mood.mood_label|title }}</span>
+                                                <span class="mood-score-value">{{ mood.mood_score }}/10</span>
+                                            </div>
+                                            {% if mood.notes %}
+                                                <div class="mood-notes">{{ mood.notes[:100] }}{% if mood.notes|length > 100 %}...{% endif %}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="mood-date text-muted">
+                                            {{ mood.created_at.strftime('%b %d, %Y') }}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">No mood entries yet. Start tracking your mood!</p>
+                                    <a href="{{ url_for('dashboard.new_mood_entry') }}" class="btn btn-primary">Add First Entry</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('dashboard.new_mood_entry') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-plus"></i> Log Mood
+                                </a>
+                                <a href="{{ url_for('dashboard.chat') }}" class="btn btn-outline-success">
+                                    <i class="fas fa-comments"></i> Chat with AI
+                                </a>
+                                <a href="{{ url_for('dashboard.voice_journal') }}" class="btn btn-outline-info">
+                                    <i class="fas fa-microphone"></i> Voice Journal
+                                </a>
+                                <a href="{{ url_for('dashboard.analytics') }}" class="btn btn-outline-warning">
+                                    <i class="fas fa-chart-line"></i> View Analytics
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            {% if user_achievements %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Recent Achievements</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for achievement in user_achievements[:6] %}
+                                <div class="col-md-4 col-lg-2 mb-3">
+                                    <div class="achievement-card text-center">
+                                        <div class="achievement-icon">
+                                            <i class="fas {{ achievement.icon }} fa-2x text-warning"></i>
+                                        </div>
+                                        <div class="achievement-name">{{ achievement.name }}</div>
+                                        <div class="achievement-points">+{{ achievement.points }} pts</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Quick Mood Modal -->
+<div class="modal fade" id="quickMoodModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Mood Entry</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickMoodForm">
+                    <div class="mb-3">
+                        <label class="form-label">How are you feeling?</label>
+                        <div class="mood-buttons d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-danger mood-btn" data-mood="1" data-label="terrible">
+                                😢<br><small>1</small>
+                            </button>
+                            <button type="button" class="btn btn-outline-warning mood-btn" data-mood="3" data-label="bad">
+                                😔<br><small>3</small>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary mood-btn" data-mood="5" data-label="okay">
+                                😐<br><small>5</small>
+                            </button>
+                            <button type="button" class="btn btn-outline-info mood-btn" data-mood="7" data-label="good">
+                                🙂<br><small>7</small>
+                            </button>
+                            <button type="button" class="btn btn-outline-success mood-btn" data-mood="9" data-label="great">
+                                😊<br><small>9</small>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveQuickMood">Save Mood</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    border-right: 1px solid #dee2e6;
+}
+
+.sidebar .nav-link {
+    color: #495057;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 0.25rem;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #e9ecef;
+}
+
+.sidebar .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.wellness-score-card .wellness-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    color: white;
+}
+
+.wellness-score-card .score {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.wellness-score-card .label {
+    font-size: 0.875rem;
+    opacity: 0.8;
+}
+
+.streak-display, .level-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.streak-number, .level-number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+.mood-entry {
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+}
+
+.mood-emoji {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+}
+
+.mood-label {
+    font-weight: 500;
+    margin-right: 0.5rem;
+}
+
+.mood-score-value {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.mood-notes {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.achievement-card {
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+}
+
+.achievement-name {
+    font-weight: 500;
+    margin: 0.5rem 0 0.25rem;
+}
+
+.achievement-points {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.mood-buttons .btn {
+    flex: 1;
+    margin: 0 0.25rem;
+    padding: 1rem 0.5rem;
+    border-radius: 0.5rem;
+}
+
+.mood-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let selectedMood = null;
+    
+    // Handle mood button clicks
+    document.querySelectorAll('.mood-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active class from all buttons
+            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            selectedMood = {
+                score: parseInt(this.dataset.mood),
+                label: this.dataset.label
+            };
+        });
+    });
+    
+    // Handle save button
+    document.getElementById('saveQuickMood').addEventListener('click', function() {
+        if (!selectedMood) {
+            alert('Please select a mood first!');
+            return;
+        }
+        
+        // Send AJAX request
+        fetch('{{ url_for("dashboard.quick_mood") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(selectedMood)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+});
+</script>
+{% endblock %}

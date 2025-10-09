@@ -3,15 +3,11 @@ User Model for WellnessWeavers
 Comprehensive user management with authentication and wellness tracking
 """
 
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-from app import db
+from database import db
 import json
-
-# Import db from app context
-from app import db
 
 class User(UserMixin, db.Model):
     """Enhanced User model with comprehensive mental health features"""
@@ -19,9 +15,10 @@ class User(UserMixin, db.Model):
     
     # Primary identification
     id = db.Column(db.Integer, primary_key=True)
+    firebase_uid = db.Column(db.String(128), unique=True, nullable=True, index=True)  # Firebase UID
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=True)  # Nullable for Firebase-only users
     
     # Profile information
     full_name = db.Column(db.String(100))
@@ -97,6 +94,7 @@ class User(UserMixin, db.Model):
     sleep_logs = db.relationship('SleepLog', back_populates='user', lazy='dynamic', cascade='all, delete-orphan')
     activity_logs = db.relationship('ActivityLog', back_populates='user', lazy='dynamic', cascade='all, delete-orphan')
     social_interactions = db.relationship('SocialInteraction', back_populates='user', lazy='dynamic', cascade='all, delete-orphan')
+    safety_plans = db.relationship('SafetyPlan', back_populates='user', lazy='dynamic', cascade='all, delete-orphan')
     
     def set_password(self, password):
         """Hash and set password"""
@@ -104,7 +102,31 @@ class User(UserMixin, db.Model):
     
     def check_password(self, password):
         """Check password against hash"""
+        if not self.password_hash:
+            return False
         return check_password_hash(self.password_hash, password)
+    
+    @classmethod
+    def create_from_firebase(cls, firebase_user_data):
+        """Create user from Firebase authentication data"""
+        user = cls(
+            firebase_uid=firebase_user_data['uid'],
+            email=firebase_user_data.get('email'),
+            username=firebase_user_data.get('email', '').split('@')[0],  # Default username from email
+            full_name=firebase_user_data.get('name'),
+            is_verified=firebase_user_data.get('email_verified', False),
+            email_verified_at=datetime.utcnow() if firebase_user_data.get('email_verified') else None
+        )
+        return user
+    
+    @classmethod
+    def get_by_firebase_uid(cls, firebase_uid):
+        """Get user by Firebase UID"""
+        return cls.query.filter_by(firebase_uid=firebase_uid).first()
+    
+    def is_firebase_user(self):
+        """Check if user is authenticated via Firebase"""
+        return self.firebase_uid is not None
     
     def update_wellness_score(self):
         """Calculate and update wellness score based on recent activities"""

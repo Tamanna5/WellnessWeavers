@@ -3,7 +3,7 @@ Achievement Model for WellnessWeavers
 Gamification system with comprehensive tracking and rewards
 """
 
-from app import db
+from database import db
 from datetime import datetime
 import json
 
@@ -436,6 +436,64 @@ class Achievement(db.Model):
                 newly_earned.append(achievement)
         
         return newly_earned
+    
+    @classmethod
+    def check_and_award_achievements(cls, user):
+        """Check and award achievements for a user"""
+        from models.mood import Mood
+        from models.conversation import Conversation
+        
+        # Get user's current data
+        user_data = {
+            'mood_entries': Mood.query.filter_by(user_id=user.id).count(),
+            'conversations': Conversation.query.filter_by(user_id=user.id).count(),
+            'streak_days': user.streak_days,
+            'wellness_score': user.wellness_score,
+            'total_points': user.total_points,
+            'level': user.level
+        }
+        
+        # Get user's achievements
+        user_achievements = cls.query.filter_by(user_id=user.id).all()
+        newly_earned = []
+        
+        for achievement in user_achievements:
+            if not achievement.earned and achievement.check_progress(user_data):
+                newly_earned.append(achievement)
+                # Award points
+                user.add_experience_points(achievement.points)
+        
+        return newly_earned
+    
+    @classmethod
+    def get_user_progress(cls, user):
+        """Get user's achievement progress"""
+        user_achievements = cls.query.filter_by(user_id=user.id).all()
+        
+        progress = {
+            'total_achievements': len(user_achievements),
+            'earned_achievements': len([a for a in user_achievements if a.earned]),
+            'in_progress': len([a for a in user_achievements if not a.earned and a.current_progress > 0]),
+            'not_started': len([a for a in user_achievements if not a.earned and a.current_progress == 0]),
+            'achievements': []
+        }
+        
+        for achievement in user_achievements:
+            progress['achievements'].append({
+                'id': achievement.id,
+                'title': achievement.title,
+                'description': achievement.description,
+                'icon': achievement.icon,
+                'points': achievement.points,
+                'rarity': achievement.rarity,
+                'category': achievement.category,
+                'current_progress': achievement.current_progress,
+                'target_value': achievement.target_value,
+                'earned': achievement.earned,
+                'progress_percentage': (achievement.current_progress / achievement.target_value * 100) if achievement.target_value > 0 else 0
+            })
+        
+        return progress
     
     def __repr__(self):
         status = "✅" if self.earned else "⏳"

@@ -14,6 +14,27 @@
                         <p class="text-muted">Create your account and start your mental health journey</p>
                     </div>
 
+                    <!-- Firebase Authentication -->
+                    <div class="mb-4">
+                        <div class="d-grid mb-3">
+                            <button type="button" class="btn btn-primary btn-lg" id="firebase-register-btn">
+                                <i class="fab fa-google"></i> Continue with Google
+                            </button>
+                        </div>
+                        <div class="d-grid mb-3">
+                            <button type="button" class="btn btn-dark btn-lg" id="firebase-phone-register-btn">
+                                <i class="fas fa-phone"></i> Continue with Phone
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-3">
+                        <hr>
+                        <span class="text-muted">or</span>
+                        <hr>
+                    </div>
+
+                    <!-- Traditional Registration Form -->
                     <form method="POST" id="register-form">
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -136,8 +157,8 @@
                         </div>
 
                         <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-user-plus"></i> Create Account
+                            <button type="submit" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-user-plus"></i> Create Account with Email
                             </button>
                         </div>
                     </form>
@@ -178,8 +199,162 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    let firebaseApp = null;
+    let firebaseAuth = null;
+    
+    // Initialize Firebase
+    async function initializeFirebase() {
+        try {
+            const response = await fetch('/auth/firebase/config');
+            const config = await response.json();
+            
+            if (config.success && config.config && config.config.apiKey && config.config.apiKey !== 'dummy-key') {
+                firebaseApp = firebase.initializeApp(config.config);
+                firebaseAuth = firebase.auth();
+                firebaseAuth.onAuthStateChanged(handleAuthStateChange);
+                enableFirebaseButtons(true);
+            } else {
+                enableFirebaseButtons(false);
+                console.warn('Firebase not fully configured. Hiding social sign-up.');
+            }
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            enableFirebaseButtons(false);
+        }
+    }
+    
+    // Handle authentication state changes
+    function handleAuthStateChange(user) {
+        if (user) {
+            // User is signed in
+            user.getIdToken().then(idToken => {
+                registerWithBackend(idToken);
+            });
+        }
+    }
+    
+    // Register with backend
+    async function registerWithBackend(idToken) {
+        try {
+            // Collect additional user data
+            const additionalData = {
+                username: prompt('Choose a username (optional):') || '',
+                age_range: prompt('Age range (e.g., 18-25):') || '',
+                gender: prompt('Gender (optional):') || '',
+                cultural_background: prompt('Cultural background (optional):') || '',
+                location_city: prompt('City (optional):') || ''
+            };
+            
+            const response = await fetch('/auth/firebase/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    idToken: idToken,
+                    additionalData: additionalData
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Redirect to dashboard
+                window.location.href = '/dashboard';
+            } else {
+                console.error('Registration failed:', result.error);
+                showError(result.error);
+            }
+        } catch (error) {
+            console.error('Backend registration error:', error);
+            showError('Registration failed. Please try again.');
+        }
+    }
+    
+    // Google Sign-Up
+    document.getElementById('firebase-register-btn').addEventListener('click', function() {
+        if (!firebaseAuth) {
+            showError('Firebase not initialized. Please refresh the page.');
+            return;
+        }
+        
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        
+        firebaseAuth.signInWithPopup(provider).catch(function(error) {
+            console.error('Google sign-up error:', error);
+            showError('Google sign-up failed. Please try again.');
+        });
+    });
+    
+    // Phone Sign-Up
+    document.getElementById('firebase-phone-register-btn').addEventListener('click', function() {
+        if (!firebaseAuth) {
+            showError('Firebase not initialized. Please refresh the page.');
+            return;
+        }
+        
+        const phoneNumber = prompt('Enter your phone number (with country code):');
+        if (!phoneNumber) return;
+        
+        const appVerifier = new firebase.auth.RecaptchaVerifier('firebase-phone-register-btn', {
+            'size': 'invisible'
+        });
+        
+        firebaseAuth.signInWithPhoneNumber(phoneNumber, appVerifier)
+            .then(function(confirmationResult) {
+                const code = prompt('Enter the verification code sent to your phone:');
+                if (code) {
+                    return confirmationResult.confirm(code);
+                }
+            })
+            .catch(function(error) {
+                console.error('Phone sign-up error:', error);
+                showError('Phone sign-up failed. Please try again.');
+            });
+    });
+    
+    // Show error message
+    function showError(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const container = document.querySelector('.card-body');
+        container.insertBefore(alertDiv, container.firstChild);
+    }
+
+    function enableFirebaseButtons(enabled) {
+        const googleBtn = document.getElementById('firebase-register-btn');
+        const phoneBtn = document.getElementById('firebase-phone-register-btn');
+        if (!enabled) {
+            if (googleBtn) { googleBtn.disabled = true; googleBtn.classList.add('disabled'); }
+            if (phoneBtn) { phoneBtn.disabled = true; phoneBtn.classList.add('disabled'); }
+            const note = document.createElement('div');
+            note.className = 'alert alert-warning';
+            note.textContent = 'Google/Phone sign-up is unavailable until Firebase is configured.';
+            const container = document.querySelector('.card-body');
+            container.insertBefore(note, container.firstChild);
+        } else {
+            if (googleBtn) { googleBtn.disabled = false; googleBtn.classList.remove('disabled'); }
+            if (phoneBtn) { phoneBtn.disabled = false; phoneBtn.classList.remove('disabled'); }
+        }
+    }
+    
+    // Initialize Firebase
+    initializeFirebase();
+    
     // Password toggle functionality
     function setupPasswordToggle(toggleId, inputId) {
         const toggle = document.getElementById(toggleId);

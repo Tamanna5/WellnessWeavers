@@ -3,7 +3,7 @@ Mood Model for WellnessWeavers
 Comprehensive mood tracking with AI analysis and pattern recognition
 """
 
-from app import db
+from database import db
 from datetime import datetime
 import json
 
@@ -366,6 +366,88 @@ class Mood(db.Model):
                 })
         
         return insights
+    
+    @classmethod
+    def get_user_mood_stats(cls, user_id, days=30):
+        """Get mood statistics for a user over specified days"""
+        from datetime import timedelta
+        
+        start_date = datetime.utcnow() - timedelta(days=days)
+        moods = cls.query.filter(
+            cls.user_id == user_id,
+            cls.created_at >= start_date
+        ).all()
+        
+        if not moods:
+            return {
+                'average_mood': 0,
+                'total_entries': 0,
+                'best_mood': 0,
+                'worst_mood': 0,
+                'consistency_score': 0
+            }
+        
+        scores = [mood.mood_score for mood in moods]
+        
+        return {
+            'average_mood': sum(scores) / len(scores),
+            'total_entries': len(moods),
+            'best_mood': max(scores),
+            'worst_mood': min(scores),
+            'consistency_score': (len(moods) / days) * 100
+        }
+    
+    @classmethod
+    def get_mood_patterns(cls, user_id, days=90):
+        """Get mood patterns and insights for a user"""
+        from datetime import timedelta
+        
+        start_date = datetime.utcnow() - timedelta(days=days)
+        moods = cls.query.filter(
+            cls.user_id == user_id,
+            cls.created_at >= start_date
+        ).order_by(cls.created_at.asc()).all()
+        
+        if not moods:
+            return []
+        
+        patterns = []
+        
+        # Check for declining mood trend
+        recent_scores = [mood.mood_score for mood in moods[-7:]]
+        if len(recent_scores) >= 5:
+            if all(recent_scores[i] >= recent_scores[i+1] for i in range(len(recent_scores)-1)):
+                patterns.append({
+                    'type': 'concern',
+                    'title': 'Declining Mood Trend',
+                    'description': 'Your mood has been declining over the past week. Consider reaching out for support.',
+                    'suggestion': 'Try some relaxation techniques or speak with a trusted friend.'
+                })
+        
+        # Check for consistent low mood
+        low_mood_count = sum(1 for mood in moods if mood.mood_score <= 3)
+        if low_mood_count >= len(moods) * 0.3:  # 30% of entries are low mood
+            patterns.append({
+                'type': 'concern',
+                'title': 'Frequent Low Mood',
+                'description': 'You\'ve been experiencing low mood frequently. This might be a sign to seek professional help.',
+                'suggestion': 'Consider speaking with a mental health professional.'
+            })
+        
+        # Check for positive trends
+        if len(moods) >= 14:
+            recent_avg = sum(mood.mood_score for mood in moods[-14:]) / 14
+            older_avg = sum(mood.mood_score for mood in moods[-28:-14]) / 14 if len(moods) >= 28 else recent_avg
+            
+            if recent_avg > older_avg + 1:
+                patterns.append({
+                    'type': 'positive',
+                    'title': 'Improving Mood Trend',
+                    'description': 'Your mood has been improving! Keep up the great work.',
+                    'suggestion': 'Continue the activities that are helping you feel better.'
+                })
+        
+        return patterns
     
     def __repr__(self):
         return f'<Mood {self.id}: {self.mood_score}/10 at {self.timestamp}>'

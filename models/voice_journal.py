@@ -3,7 +3,7 @@ Voice Journal Model for WellnessWeavers
 Voice-based mood tracking with comprehensive audio analysis
 """
 
-from app import db
+from database import db
 from datetime import datetime
 import json
 import os

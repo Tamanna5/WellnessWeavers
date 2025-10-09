@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Thought Records - WellnessWeavers{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>CBT Thought Records</h2>
+            <p class="text-muted">Challenge negative thoughts and develop healthier thinking patterns</p>
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>Your Recent Thought Records</h4>
+                <a href="{{ url_for('therapy_tools.new_thought_record') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Thought Record
+                </a>
+            </div>
+            
+            {% if recent_records %}
+                <div class="row">
+                    {% for record in recent_records %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ record.primary_emotion|title }} - {{ record.emotion_intensity }}/10</h6>
+                                <p class="card-text">{{ record.automatic_thought[:100] }}{% if record.automatic_thought|length > 100 %}...{% endif %}</p>
+                                <small class="text-muted">{{ record.created_at.strftime('%B %d, %Y') }}</small>
+                                {% if record.is_completed %}
+                                    <span class="badge bg-success ms-2">Completed</span>
+                                {% else %}
+                                    <span class="badge bg-warning ms-2">In Progress</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-brain fa-3x text-muted mb-3"></i>
+                    <h5>No thought records yet</h5>
+                    <p class="text-muted">Start your first thought record to begin challenging negative thoughts</p>
+                    <a href="{{ url_for('therapy_tools.new_thought_record') }}" class="btn btn-primary">
+                        Create Your First Thought Record
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Your Progress</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Total Records:</strong> {{ progress.total_records }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Average Mood Improvement:</strong> {{ "%.1f"|format(progress.average_emotion_reduction) }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Most Common Distortions:</strong>
+                        <ul class="list-unstyled mt-2">
+                            {% for distortion in progress.most_common_distortions[:3] %}
+                            <li class="text-muted">{{ distortion.distortion|title }} ({{ distortion.count }} times)</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>What are Thought Records?</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small">Thought records are a core CBT technique that helps you:</p>
+                    <ul class="small">
+                        <li>Identify negative thought patterns</li>
+                        <li>Challenge unhelpful thoughts</li>
+                        <li>Develop balanced thinking</li>
+                        <li>Improve emotional regulation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -2,7 +2,7 @@
 Goals and Milestones Models
 """
 
-from app import db
+from database import db
 from datetime import datetime, date
 import json
 

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Behavioral Activation - WellnessWeavers{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Behavioral Activation</h2>
+            <p class="text-muted">Schedule activities that improve your mood and build mastery</p>
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>Your Activities</h4>
+                <a href="{{ url_for('therapy_tools.new_activity') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Schedule Activity
+                </a>
+            </div>
+            
+            {% if recent_activities %}
+                <div class="row">
+                    {% for activity in recent_activities %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ activity.activity_name }}</h6>
+                                <p class="card-text">{{ activity.activity_description[:100] }}{% if activity.activity_description|length > 100 %}...{% endif %}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">{{ activity.scheduled_date.strftime('%B %d, %Y') }}</small>
+                                    {% if activity.is_completed %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Scheduled</span>
+                                    {% endif %}
+                                </div>
+                                {% if activity.is_completed and activity.mood_change %}
+                                    <div class="mt-2">
+                                        <small class="text-success">
+                                            <i class="fas fa-arrow-up"></i> Mood improved by {{ activity.mood_change }} points
+                                        </small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                    <h5>No activities scheduled</h5>
+                    <p class="text-muted">Start scheduling activities to improve your mood and build mastery</p>
+                    <a href="{{ url_for('therapy_tools.new_activity') }}" class="btn btn-primary">
+                        Schedule Your First Activity
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Your Insights</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Total Activities:</strong> {{ insights.total_activities }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Completion Rate:</strong> {{ "%.1f"|format(insights.completion_rate) }}%
+                    </div>
+                    <div class="mb-3">
+                        <strong>Average Mood Improvement:</strong> {{ "%.1f"|format(insights.average_mood_improvement) }}
+                    </div>
+                    {% if insights.most_effective_categories %}
+                    <div class="mb-3">
+                        <strong>Most Effective Categories:</strong>
+                        <ul class="list-unstyled mt-2">
+                            {% for category in insights.most_effective_categories %}
+                            <li class="text-muted">{{ category.category|title }} ({{ "%.1f"|format(category.average_effectiveness) }}/10)</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Activity Categories</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <strong>Pleasurable:</strong> Activities you enjoy
+                    </div>
+                    <div class="mb-2">
+                        <strong>Mastery:</strong> Activities that build skills
+                    </div>
+                    <div class="mb-2">
+                        <strong>Social:</strong> Activities with others
+                    </div>
+                    <div class="mb-2">
+                        <strong>Physical:</strong> Activities that move your body
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
